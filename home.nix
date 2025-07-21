@@ -20,5 +20,6 @@
   
   # Packages
   home.packages = with pkgs; [
+    git
   ];
 }

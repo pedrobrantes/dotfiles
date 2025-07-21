@@ -53,7 +53,9 @@ jobs:
 
       - name: Run container
         run: |
-          CONTAINER_NAME="nix-test-container
+          CONTAINER_NAME="nix-test-container"
+          IMAGE_NAME="${{ needs.build-docker-image.outputs.image_name }}"
+          docker run --name ${CONTAINER_NAME} -d ${IMAGE_NAME} tail -f /dev/null
 
       - name: Run Git config test in container
         run: |

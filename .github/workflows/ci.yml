@@ -20,7 +20,7 @@ jobs:
 
       - name: Run tests in container
         run: |
-          docker run --name nix-test-container -d nix-test-env
+          docker run --name nix-test-container -d nix-test-env tail -f /dev/null
           docker exec nix-test-container home-manager switch
           docker exec nix-test-container bash -lc "git config --global user.name | grep 'PedroBrantes'"
           docker exec nix-test-container bash -lc "printenv EDITOR | grep 'nvim'"

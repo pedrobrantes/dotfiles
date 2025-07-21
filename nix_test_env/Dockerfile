@@ -40,7 +40,7 @@ RUN . /root/.nix-profile/etc/profile.d/nix.sh && \
     nix-shell '<home-manager>' -A install
 
 # Entrypoint
-COPY docker_entrypoint.sh /usr/local/bin/docker_entrypoint.sh
+COPY ./docker_entrypoint.sh /usr/local/bin/docker_entrypoint.sh
 RUN chmod +x /usr/local/bin/docker_entrypoint.sh
 
 WORKDIR /root

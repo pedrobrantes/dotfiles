@@ -18,12 +18,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Build Docker image
+      - name: Build docker image
         id: build
         run: |
           IMAGE_NAME="nix-test-env:$(git rev-parse --short HEAD)"
           docker build -t ${IMAGE_NAME} -f ./nix_test_env/Dockerfile .
           echo "image_name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Save Docker image
+        run: |
+          docker save ${{ steps.build.outputs.image_name }} -o nix-image.tar
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nix-docker-image
+          path: nix-image.tar
 
   tests:
     runs-on: ubuntu-latest
@@ -32,15 +42,18 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Pull Docker image (if not cached)
-        run: docker pull ${{ needs.build-docker-image.outputs.image_name }} \
-          || true
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nix-docker-image
+
+      - name: Load Docker image
+        run: |
+          docker load -i nix-image.tar
 
       - name: Run container
         run: |
-          CONTAINER_NAME="nix-test-container-git"
-          IMAGE_NAME="${{ needs.build-docker-image.outputs.image_name }}"
-          docker run --name ${CONTAINER_NAME} -d ${IMAGE_NAME} tail -f /dev/null
+          CONTAINER_NAME="nix-test-container
 
       - name: Run Git config test in container
         run: |

@@ -52,25 +52,31 @@ jobs:
           docker load -i nix-image.tar
 
       - name: Run container
+        id: container
         run: |
           CONTAINER_NAME="nix-test-container"
-          IMAGE_NAME="${{ needs.build-docker-image.outputs.image_name }}"
-          docker run --name ${CONTAINER_NAME} -d ${IMAGE_NAME} tail -f /dev/null
+          docker run --name ${CONTAINER_NAME} -d \
+            ${{ needs.build-docker-image.outputs.image_name }} tail -f /dev/null
+          echo "container_name=${CONTAINER_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Run home-manager switch
+        run: |
+          docker exec ${{ steps.container.outputs.container_name }} bash \
+            home-manager switch
 
       - name: Run Git config test in container
         run: |
-          docker exec ${CONTAINER_NAME} home-manager switch
-          docker exec ${CONTAINER_NAME} bash -c \
-            "source /root/.nix-profile/etc/profile.d/nix.sh && \
-             git config --global user.name | grep 'PedroBrantes'"
+          docker exec ${{ steps.container.outputs.container_name }} bash -ec "
+            source /root/.nix-profile/etc/profile.d/nix.sh
+            git config --global user.name | grep -q 'PedroBrantes'
+          "
 
       - name: Run Editor env test in container
         run: |
-          docker exec ${CONTAINER_NAME} home-manager switch
-          docker exec ${CONTAINER_NAME} bash -c \
-            "source /root/.nix-profile/etc/profile.d/nix.sh && \
-             printenv EDITOR | grep 'nvim'"
+          docker exec ${{ steps.container.outputs.container_name }} bash -ec "
+            source /root/.nix-profile/etc/profile.d/nix.sh
+            printenv EDITOR | grep -q 'nvim'
+          "
 
       - name: Clean up container
-        run: |
-          docker rm -f ${CONTAINER_NAME} # Clean up after test
+        run: docker rm -f ${{ steps.container.outputs.container_name }}

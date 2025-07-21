@@ -12,14 +12,14 @@
     EDITOR = "nvim";
   };
 
+  # Packages
+  home.packages = with pkgs; [
+    git
+  ];
+
   # Programs modules
   imports = [
     ./programs/python.nix
     ./programs/git.nix
-  ];
-  
-  # Packages
-  home.packages = with pkgs; [
-    git
   ];
 }

@@ -7,5 +7,3 @@ services:
       - "2223:22"
     volumes:
       - /home/brantes/.config/home-manager:/root/.config/home-manager
-    # Keep container running in background
-    command: tail -f /dev/null

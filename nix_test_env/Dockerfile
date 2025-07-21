@@ -20,27 +20,28 @@ RUN mkdir -m 0755 /nix \
 # Set environment so Nix is on PATH
 ENV USER=root
 ENV HOME=/root
-ENV PATH=/root/.nix-profile/bin:/root/.nix-profile/sbin:$PATH
-
-# Install Nix
-RUN curl -L https://nixos.org/nix/install | sh -s -- --daemon
 
 # Configure Nix to run in unprivileged mode (no nixbld group needed)
 RUN mkdir -p /etc/nix && echo "build-users-group =" >> /etc/nix/nix.conf
 
+# Install Nix
+RUN curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --no-modify-profile --no-channel-add --yes
+
+# Set PATH after Nix installation to include Nix binaries explicitly
+ENV PATH="/root/.nix-profile/bin:/root/.nix-profile/sbin:${PATH}"
+
 # Add Nix channels for Nixpkgs and Home Manager
 # Source the Nix profile before running nix-channel commands
-RUN . /root/.nix-profile/etc/profile.d/nix.sh && \
-    nix-channel --add https://nixos.org/channels/nixos-25.05 nixpkgs && \
-    nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager && \
-    nix-channel --update
+RUN . /root/.nix-profile/etc/profile.d/nix.sh
+RUN nix-channel --add https://nixos.org/channels/nixos-25.05 nixpkgs
+RUN nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager
+RUN nix-channel --update
 
-# Install home-manager for the root user
-RUN . /root/.nix-profile/etc/profile.d/nix.sh && \
-    nix-shell '<home-manager>' -A install
+# Install home-manager
+RUN nix-env -iA home-manager -f '<home-manager>'
 
-# Set the working directory
-WORKDIR /root
+# Copy into the container
+WORKDIR /root/.config/home-manager
+COPY . .
 
-# Default command when the container starts
-CMD ["bash"]
+CMD ["tail", "-f", "/dev/null"]

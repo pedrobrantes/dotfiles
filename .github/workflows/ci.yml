@@ -1,30 +1,61 @@
+---
 name: CI/CD for Nix Dotfiles
 
 on:
   push:
     branches:
-      - main # Or your default branch
+      - main
   pull_request:
     branches:
       - main
 
 jobs:
-  test-dotfiles:
+  build-docker-image:
     runs-on: ubuntu-latest
+    outputs:
+      image_name: ${{ steps.build.outputs.image_name }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t nix-test-env -f ./nix_test_env/Dockerfile .
-
-      - name: Run tests in container
+        id: build
         run: |
-          docker run --name nix-test-container -d nix-test-env tail -f /dev/null
-          docker exec nix-test-container home-manager switch
-          docker exec nix-test-container bash -lc "git config --global user.name | grep 'PedroBrantes'"
-          docker exec nix-test-container bash -lc "printenv EDITOR | grep 'nvim'"
+          IMAGE_NAME="nix-test-env:$(git rev-parse --short HEAD)"
+          docker build -t ${IMAGE_NAME} -f ./nix_test_env/Dockerfile .
+          echo "image_name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
+
+  tests:
+    runs-on: ubuntu-latest
+    needs: build-docker-image
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Pull Docker image (if not cached)
+        run: docker pull ${{ needs.build-docker-image.outputs.image_name }} \
+          || true
+
+      - name: Run container
+        run: |
+          CONTAINER_NAME="nix-test-container-git"
+          IMAGE_NAME="${{ needs.build-docker-image.outputs.image_name }}"
+          docker run --name ${CONTAINER_NAME} -d ${IMAGE_NAME} tail -f /dev/null
+
+      - name: Run Git config test in container
+        run: |
+          docker exec ${CONTAINER_NAME} home-manager switch
+          docker exec ${CONTAINER_NAME} bash -c \
+            "source /root/.nix-profile/etc/profile.d/nix.sh && \
+             git config --global user.name | grep 'PedroBrantes'"
+
+      - name: Run Editor env test in container
+        run: |
+          docker exec ${CONTAINER_NAME} home-manager switch
+          docker exec ${CONTAINER_NAME} bash -c \
+            "source /root/.nix-profile/etc/profile.d/nix.sh && \
+             printenv EDITOR | grep 'nvim'"
 
       - name: Clean up container
-        if: always()
-        run: docker rm -f nix-test-container
+        run: |
+          docker rm -f ${CONTAINER_NAME} # Clean up after test

@@ -1,0 +1,30 @@
+name: CI/CD for Nix Dotfiles
+
+on:
+  push:
+    branches:
+      - main # Or your default branch
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-dotfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t nix-test-env -f ./nix_test_env/Dockerfile .
+
+      - name: Run tests in container
+        run: |
+          docker run --name nix-test-container -d nix-test-env
+          docker exec nix-test-container home-manager switch
+          docker exec nix-test-container bash -lc "git config --global user.name | grep 'PedroBrantes'"
+          docker exec nix-test-container bash -lc "printenv EDITOR | grep 'nvim'"
+
+      - name: Clean up container
+        if: always()
+        run: docker rm -f nix-test-container

@@ -1,0 +1,11 @@
+---
+services:
+  nix-test:
+    image: nix-test-env
+    container_name: nix-test-env
+    ports:
+      - "2223:22"
+    volumes:
+      - /home/brantes/.config/home-manager:/root/.config/home-manager
+    # Keep container running in background
+    command: tail -f /dev/null

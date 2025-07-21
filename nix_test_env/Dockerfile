@@ -39,8 +39,10 @@ RUN . /root/.nix-profile/etc/profile.d/nix.sh && \
 RUN . /root/.nix-profile/etc/profile.d/nix.sh && \
     nix-shell '<home-manager>' -A install
 
-# Set the working directory
-WORKDIR /root
+# Entrypoint
+COPY docker_entrypoint.sh /usr/local/bin/docker_entrypoint.sh
+RUN chmod +x /usr/local/bin/docker_entrypoint.sh
 
-# Default command when the container starts
-CMD ["bash"]
+WORKDIR /root
+ENTRYPOINT ["/usr/local/bin/docker_entrypoint.sh"]
+CMD ["tail", "-f", "/dev/null"]

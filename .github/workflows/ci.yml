@@ -67,14 +67,12 @@ jobs:
       - name: Run Git config test in container
         run: |
           docker exec ${{ steps.container.outputs.container_name }} bash -ec "
-            source /root/.nix-profile/etc/profile.d/nix.sh
             git config --global user.name | grep -q 'PedroBrantes'
           "
 
       - name: Run Editor env test in container
         run: |
           docker exec ${{ steps.container.outputs.container_name }} bash -ec "
-            source /root/.nix-profile/etc/profile.d/nix.sh
             printenv EDITOR | grep -q 'nvim'
           "
 

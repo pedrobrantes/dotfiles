@@ -103,7 +103,7 @@ jobs:
 
       - name: Run git config test in container
         run: |
-          docker exec ${{ steps.container.outputs.container_name }} bash -ec "
+          docker exec ${{ steps.container.outputs.container_name }} bash -ic "
             echo 'Load the Nix environment'
             source /root/.nix-profile/etc/profile.d/nix.sh
             echo 'Git test'
@@ -112,7 +112,7 @@ jobs:
 
       - name: Run env test in container
         run: |
-          docker exec ${{ steps.container.outputs.container_name }} bash -ec "
+          docker exec ${{ steps.container.outputs.container_name }} bash -ic "
             echo 'Load the Nix environment'
             source /root/.nix-profile/etc/profile.d/nix.sh
             echo 'Env test'

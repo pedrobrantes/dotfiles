@@ -56,6 +56,7 @@ jobs:
         run: |
           CONTAINER_NAME="nix-test-container"
           docker run --name ${CONTAINER_NAME} -d \
+            --entrypoint /usr/local/bin/docker_entrypoint.sh \
             ${{ needs.build-docker-image.outputs.image_name }} tail -f /dev/null
           echo "container_name=${CONTAINER_NAME}" >> $GITHUB_OUTPUT
 

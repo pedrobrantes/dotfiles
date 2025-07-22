@@ -38,18 +38,25 @@ jobs:
           fi
 
       - name: Build docker image
+        if: steps.check_files.outputs.build_ran == 'true'
         id: build
         run: |
           IMAGE_NAME="nix-test-env:$(git rev-parse --short HEAD)"
           docker build -t ${IMAGE_NAME} -f ./nix_test_env/Dockerfile .
           echo "image_name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Save Docker image to GitHub Container Registry
+      - name: Log in and push Docker image to GHCR
+        if: steps.check_files.outputs.build_ran == 'true'
         run: |
-          IMAGE_NAME="ghcr.io/${{ github.repository }}/nix-test-env:$(git rev-parse --short HEAD)"
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker tag ${{ steps.build.outputs.image_name }} ${IMAGE_NAME}
-          docker push ${IMAGE_NAME}
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u \
+            ${{ github.actor }} --password-stdin
+          IMAGE_ID="ghcr.io/${{ github.repository }}/nix-test-env"
+          COMMIT_TAG="${IMAGE_ID}:$(git rev-parse --short HEAD)"
+          docker tag ${{ steps.build.outputs.image_name }} $COMMIT_TAG
+          LATEST_TAG="${IMAGE_ID}:latest"
+          docker tag ${{ steps.build.outputs.image_name }} $LATEST_TAG
+          docker push $COMMIT_TAG
+          docker push $LATEST_TAG
 
   tests:
     runs-on: ubuntu-latest
@@ -61,20 +68,33 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Pull Docker image from GitHub Container Registry
+      - name: Pull image with fallback in GHCR
+        id: docker_pull
         run: |
-          IMAGE_NAME="ghcr.io/${{ github.repository }}/nix-test-env:$(git rev-parse --short HEAD)"
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker pull ${IMAGE_NAME}
+          IMAGE_ID="ghcr.io/${{ github.repository }}/nix-test-env"
+          COMMIT_TAG="${IMAGE_ID}:$(git rev-parse --short HEAD)"
+          LATEST_TAG="${IMAGE_ID}:latest"
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u \
+            ${{ github.actor }} --password-stdin
+          if docker pull $COMMIT_TAG; then
+            echo "Successfully pulled commit-specific image: $COMMIT_TAG"
+            echo "image_to_test=$COMMIT_TAG" >> $GITHUB_OUTPUT
+          else
+            echo "Commit-specific image not found. Falling back to latest."
+            docker pull $LATEST_TAG
+            echo "image_to_test=$LATEST_TAG" >> $GITHUB_OUTPUT
+          fi
 
       - name: Run container
         id: container
         run: |
           CONTAINER_NAME="nix-test-container"
-          docker run --name ${CONTAINER_NAME} -d \
+          IMAGE_TO_TEST="${{ steps.docker_pull.outputs.image_to_test }}"
+          echo "Running tests on image: $IMAGE_TO_TEST"
+          docker run --name $CONTAINER_NAME -d \
             --entrypoint /usr/local/bin/docker_entrypoint.sh \
-            ${{ needs.build-docker-image.outputs.image_name }} tail -f /dev/null
-          echo "container_name=${CONTAINER_NAME}" >> $GITHUB_OUTPUT
+            $IMAGE_TO_TEST tail -f /dev/null
+          echo "container_name=$CONTAINER_NAME" >> $GITHUB_OUTPUT
 
       - name: Run home-manager switch
         run: |
@@ -94,4 +114,5 @@ jobs:
           "
 
       - name: Clean up container
+        if: always()
         run: docker rm -f ${{ steps.container.outputs.container_name }}

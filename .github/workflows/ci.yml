@@ -44,6 +44,7 @@ jobs:
           path: nix-image.tar
 
   debug:
+    runs-on: ubuntu-latest
     steps:
       - name: Debug event
         run: |

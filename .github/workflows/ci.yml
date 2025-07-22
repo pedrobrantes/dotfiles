@@ -98,20 +98,18 @@ jobs:
 
       - name: Run home-manager switch
         run: |
-          docker exec ${{ steps.container.outputs.container_name }} bash \
+          docker run --rm ${{ steps.container.outputs.container_name }} \
             home-manager switch
 
       - name: Run git config test in container
         run: |
-          docker exec ${{ steps.container.outputs.container_name }} \
-          bash -c "PATH=~/.nix-profile/bin:\$PATH;
+          docker run --rm ${{ steps.container.outputs.container_name }} \
             git config --global user.name | grep -q 'PedroBrantes'
           "
 
       - name: Run env test in container
         run: |
-          docker exec ${{ steps.container.outputs.container_name }} \
-          bash -c "PATH=~/.nix-profile/bin:\$PATH;
+          docker run --rm ${{ steps.container.outputs.container_name }} \
             printenv EDITOR | grep -q 'nvim'
           "
 

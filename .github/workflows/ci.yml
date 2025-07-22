@@ -11,6 +11,13 @@ on:
 
 jobs:
   build-docker-image:
+    if: |
+      github.event_name == 'push' || github.event_name == 'pull_request' &&
+      (contains(github.event.head_commit.modified, 'nix_test_env/Dockerfile') ||
+       contains(github.event.head_commit.added,    'nix_test_env/Dockerfile') ||
+       contains(github.event.head_commit.added,    'nix_test_env/docker_entrypoint.sh') ||
+       contains(github.event.head_commit.modified, 'nix_test_env/docker_entrypoint.sh'))
+
     runs-on: ubuntu-latest
     outputs:
       image_name: ${{ steps.build.outputs.image_name }}

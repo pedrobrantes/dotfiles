@@ -104,13 +104,13 @@ jobs:
 
       - name: Run git config test in container
         run: |
-          docker run --rm -it ${{ steps.container.outputs.image_name }} \
+          docker run --rm ${{ steps.container.outputs.image_name }} \
             git config --global user.name | grep -q 'PedroBrantes'
           "
 
       - name: Run env test in container
         run: |
-          docker run --rm -it ${{ steps.container.outputs.image_name }} \
+          docker run --rm ${{ steps.container.outputs.image_name }} \
             printenv EDITOR | grep -q 'nvim'
           "
 

@@ -95,21 +95,22 @@ jobs:
             --entrypoint /usr/local/bin/docker_entrypoint.sh \
             $IMAGE_TO_TEST tail -f /dev/null
           echo "container_name=$CONTAINER_NAME" >> $GITHUB_OUTPUT
+          echo "image_name=$IMAGE_TO_TEST" >> $GITHUB_OUTPUT
 
       - name: Run home-manager switch
         run: |
-          docker run --rm ${{ steps.container.outputs.container_name }} \
+          docker run --rm ${{ steps.container.outputs.image_name }} \
             home-manager switch
 
       - name: Run git config test in container
         run: |
-          docker run --rm ${{ steps.container.outputs.container_name }} \
+          docker run --rm ${{ steps.container.outputs.image_name }} \
             git config --global user.name | grep -q 'PedroBrantes'
           "
 
       - name: Run env test in container
         run: |
-          docker run --rm ${{ steps.container.outputs.container_name }} \
+          docker run --rm ${{ steps.container.outputs.image_name }} \
             printenv EDITOR | grep -q 'nvim'
           "
 

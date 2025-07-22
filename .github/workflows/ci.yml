@@ -43,6 +43,13 @@ jobs:
           name: nix-docker-image
           path: nix-image.tar
 
+  debug:
+    - name: Debug event
+      run: |
+        echo "Event name: ${{ github.event_name }}"
+        echo "Modified files: ${{ github.event.head_commit.modified }}"
+        echo "Added files: ${{ github.event.head_commit.added }}"
+
   tests:
     runs-on: ubuntu-latest
     if: |
@@ -60,6 +67,7 @@ jobs:
           name: nix-docker-image
 
       - name: Load Docker image
+        if: needs.build-docker-image.outputs.build_ran == 'true'
         run: |
           docker load -i nix-image.tar
 

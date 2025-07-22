@@ -18,6 +18,9 @@ jobs:
       image_name: ${{ steps.build.outputs.image_name }}
       build_ran: "true"
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
       - name: Check for file changes
         id: check_files
         run: |
@@ -28,8 +31,6 @@ jobs:
           else
             echo "build_ran=false" >> $GITHUB_OUTPUT
           fi
-      - name: Check out repository
-        uses: actions/checkout@v4
 
       - name: Build docker image
         id: build

@@ -39,6 +39,10 @@ RUN . /root/.nix-profile/etc/profile.d/nix.sh && \
 RUN . /root/.nix-profile/etc/profile.d/nix.sh && \
     nix-shell '<home-manager>' -A install
 
+# Nix bin path for any shells
+RUN echo 'export PATH="/root/.nix-profile/bin:$PATH"' \
+    > /etc/profile.d/hm-path.sh
+
 # Entrypoint
 COPY nix_test_env/docker_entrypoint.sh /usr/local/bin/docker_entrypoint.sh
 RUN chmod +x /usr/local/bin/docker_entrypoint.sh

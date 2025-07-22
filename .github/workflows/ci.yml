@@ -101,15 +101,21 @@ jobs:
           docker exec ${{ steps.container.outputs.container_name }} bash \
             home-manager switch
 
-      - name: Run Git config test in container
+      - name: Run git config test in container
         run: |
           docker exec ${{ steps.container.outputs.container_name }} bash -ec "
+            echo 'Load the Nix environment'
+            source /root/.nix-profile/etc/profile.d/nix.sh
+            echo 'Git test'
             git config --global user.name | grep -q 'PedroBrantes'
           "
 
-      - name: Run Editor env test in container
+      - name: Run env test in container
         run: |
           docker exec ${{ steps.container.outputs.container_name }} bash -ec "
+            echo 'Load the Nix environment'
+            source /root/.nix-profile/etc/profile.d/nix.sh
+            echo 'Env test'
             printenv EDITOR | grep -q 'nvim'
           "
 

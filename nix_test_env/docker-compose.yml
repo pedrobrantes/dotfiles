@@ -7,4 +7,3 @@ services:
       - "2223:22"
     volumes:
       - /home/brantes/.config/home-manager:/root/.config/home-manager
-

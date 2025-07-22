@@ -103,19 +103,15 @@ jobs:
 
       - name: Run git config test in container
         run: |
-          docker exec ${{ steps.container.outputs.container_name }} bash -ic "
-            echo 'Load the Nix environment'
-            source /root/.nix-profile/etc/profile.d/nix.sh
-            echo 'Git test'
+          docker exec ${{ steps.container.outputs.container_name }} \
+          bash -c "PATH=~/.nix-profile/bin:\$PATH;
             git config --global user.name | grep -q 'PedroBrantes'
           "
 
       - name: Run env test in container
         run: |
-          docker exec ${{ steps.container.outputs.container_name }} bash -ic "
-            echo 'Load the Nix environment'
-            source /root/.nix-profile/etc/profile.d/nix.sh
-            echo 'Env test'
+          docker exec ${{ steps.container.outputs.container_name }} \
+          bash -c "PATH=~/.nix-profile/bin:\$PATH;
             printenv EDITOR | grep -q 'nvim'
           "
 

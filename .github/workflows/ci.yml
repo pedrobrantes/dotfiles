@@ -12,17 +12,22 @@ on:
 jobs:
   build-docker-image:
     if: |
-      (github.event_name == 'push' || github.event_name == 'pull_request') &&
-      (contains(github.event.commits[0].modified, 'nix_test_env/Dockerfile') ||
-        contains(github.event.commits[0].added, 'nix_test_env/Dockerfile') ||
-        contains(github.event.commits[0].added, 'nix_test_env/docker_entrypoint.sh') ||
-        contains(github.event.commits[0].modified, 'nix_test_env/docker_entrypoint.sh'))
-
+      github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     outputs:
       image_name: ${{ steps.build.outputs.image_name }}
       build_ran: "true"
     steps:
+      - name: Check for file changes
+        id: check_files
+        run: |
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD | \
+          grep -E 'nix_test_env/Dockerfile|nix_test_env/docker_entrypoint.sh')
+          if [ -n "$MODIFIED_FILES" ]; then
+            echo "build_ran=true" >> $GITHUB_OUTPUT
+          else
+            echo "build_ran=false" >> $GITHUB_OUTPUT
+          fi
       - name: Check out repository
         uses: actions/checkout@v4
 
@@ -33,24 +38,12 @@ jobs:
           docker build -t ${IMAGE_NAME} -f ./nix_test_env/Dockerfile .
           echo "image_name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Save Docker image
+      - name: Save Docker image to GitHub Container Registry
         run: |
-          docker save ${{ steps.build.outputs.image_name }} -o nix-image.tar
-
-      - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nix-docker-image
-          path: nix-image.tar
-
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Debug event
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "Modified files: ${{ github.event.commits[0].modified }}"
-          echo "Added files: ${{ github.event.commits[0].added }}"
+          IMAGE_NAME="ghcr.io/${{ github.repository }}/nix-test-env:$(git rev-parse --short HEAD)"
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker tag ${{ steps.build.outputs.image_name }} ${IMAGE_NAME}
+          docker push ${IMAGE_NAME}
 
   tests:
     runs-on: ubuntu-latest
@@ -62,14 +55,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: nix-docker-image
-
-      - name: Load Docker image
+      - name: Pull Docker image from GitHub Container Registry
         run: |
-          docker load -i nix-image.tar
+          IMAGE_NAME="ghcr.io/${{ github.repository }}/nix-test-env:$(git rev-parse --short HEAD)"
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker pull ${IMAGE_NAME}
 
       - name: Run container
         id: container

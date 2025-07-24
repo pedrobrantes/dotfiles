@@ -93,7 +93,6 @@ jobs:
           echo "Running tests on image: $IMAGE_TO_TEST"
           docker run --name $CONTAINER_NAME \
             -v ./nix_tests:/app/tests -d \
-            --entrypoint /usr/local/bin/docker_entrypoint.sh \
             $IMAGE_TO_TEST tail -f /dev/null
           echo "container_name=$CONTAINER_NAME" >> $GITHUB_OUTPUT
 

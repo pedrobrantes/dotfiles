@@ -96,6 +96,11 @@ jobs:
             $IMAGE_TO_TEST tail -f /dev/null
           echo "container_name=$CONTAINER_NAME" >> $GITHUB_OUTPUT
 
+      - name: Run Debug Script in Container
+        run: |
+          docker exec ${{ steps.container.outputs.container_name }} \
+            /app/tests/debug_shell.sh
+
       - name: Run all tests in container
         run: |
           docker exec ${{ steps.container.outputs.container_name }} \

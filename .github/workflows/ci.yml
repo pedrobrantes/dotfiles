@@ -99,6 +99,7 @@ jobs:
       - name: Run all tests in container
         run: |
           docker exec ${{ steps.container.outputs.container_name }} \
+            /usr/local/bin/docker_entrypoint.sh \
             /app/tests/run_all.sh
 
       - name: Clean up container

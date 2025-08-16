@@ -21,5 +21,6 @@
   imports = [
     ./programs/python.nix
     ./programs/git.nix
+    ./programs/syncthing.nix
   ];
 }

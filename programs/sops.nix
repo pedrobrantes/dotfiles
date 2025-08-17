@@ -12,10 +12,10 @@
 
     # Every input is avaiable in 'config.sops.secrets.<nome>'.
     secrets = {
-      gemini_api_key" = {
+      "gemini_api_key" = {
         sopsFile = ../secrets/api_keys.yaml;
-        key = "gemini.primary"
-      }
+        key = "gemini.primary";
+      };
 
       # Add new secret on the future
       # "my_api_token" = {

@@ -1,11 +1,7 @@
-{ config, pkgs, ... }:
+{ config, pkgs, sops-nix, ... }:
 
 {
   home.stateVersion = "25.05";
-
-  home.username = builtins.getEnv "USER";
-
-  home.homeDirectory = builtins.getEnv "HOME";
 
   # Env
   home.sessionVariables = {
@@ -19,8 +15,12 @@
 
   # Programs modules
   imports = [
+    sops-nix.homeManagerModules.sops
     ./programs/python.nix
     ./programs/git.nix
     ./programs/syncthing.nix
+    ./programs/bitwarden.nix
+    ./programs/sops.nix
+    ./programs/nix.nix
   ];
 }

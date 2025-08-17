@@ -19,7 +19,27 @@ sh <(curl -L [https://nixos.org/nix/install](https://nixos.org/nix/install)) --d
 ```
 Follow the on-screen instructions. After the installation, close and reopen your terminal to ensure the Nix environment is loaded.
 
-### 2. Install Home Manager
+### 2. Use temp git with nix-shell
+
+```bash
+nix-shell -p git --run "git clone 'https://github.com/pedrobrantes/dotfiles.git' '${HOME}/.config/home-manager'"
+```
+
+### 3. Config Bitwarden and keys
+
+```bash
+nix-shell -p bitwarden-cli
+```
+
+```bash
+bw login
+export BW_SESSION=$(bw unlock --raw)
+mkdir -p ~/.config/sops/age
+bw get notes sops-nix_age_private.key | tee ~/.config/sops/age/keys.txt
+sudo chmod 600 ~/.config/sops/age/keys.txt
+```
+
+### 4. Install Home Manager
 
 With Nix installed, install Home Manager using the specific **25.05** release channel.
 
@@ -30,7 +50,7 @@ nix-shell '<home-manager>' -A install
 ```
 This will create the initial Home Manager files and directories.
 
-### 3. Clone This Repository
+### 5. Clone This Repository
 
 Clone this repository into the Home Manager configuration directory (`~/.config/home-manager`).
 
@@ -38,12 +58,19 @@ Clone this repository into the Home Manager configuration directory (`~/.config/
 git clone git@github.com:pedrobrantes/dotfiles.git ~/.config/home-manager
 ```
 
-### 4. Apply the Configuration
+### 6. Apply the Configuration
 
 Navigate to the directory and run `home-manager switch`. This command builds your configuration and activates it, creating all the necessary symlinks.
 
 ```bash
 cd ~/.config/home-manager
-home-manager switch
+home-manager switch --flake .#brantes
 ```
+
+### OR use the boot script
+
+```sh 
+curl -sSL https://raw.githubusercontent.com/pedrobrantes/dotfiles/main/bootstrap.sh | sh
+``
+
 Your environment is now fully configured!

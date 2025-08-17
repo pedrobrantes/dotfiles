@@ -8,12 +8,13 @@
 
     age.sshKeyPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25520" ];
 
+    defaultSopsFile = ../secrets/secrets.yaml;
+
     # Every input is avaiable in 'config.sops.secrets.<nome>'.
     secrets = {
-      "api_keys" = {
+      "gemini_api_key" = {
         sopsFile = ../secrets/api_keys.yaml;
-        format = "yaml";
-        key = "";
+	key = "";
       };
 
       # Add new secret on the future

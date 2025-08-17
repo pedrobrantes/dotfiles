@@ -2,10 +2,12 @@
 
 {
   home.stateVersion = "25.05";
+  programs.home-manager.enable = true;
 
   # Env
   home.sessionVariables = {
     EDITOR = "nvim";
+    GEMINI_API_KEY = config.sops.secrets.gemini_api_key.path;
   };
 
   # Packages
@@ -22,5 +24,6 @@
     ./programs/bitwarden.nix
     ./programs/sops.nix
     ./programs/nix.nix
+    ./programs/bash.nix
   ];
 }

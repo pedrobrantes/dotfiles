@@ -7,13 +7,20 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+    bash-it = {
+      url = "github:Bash-it/bash-it";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, sops-nix }:
+  outputs = { self, nixpkgs, home-manager, sops-nix, bash-it }@inputs:
     let
       mkHome = { username, system ? "x86_64-linux" }: home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.${system};
-        extraSpecialArgs = { inherit sops-nix; };
+        extraSpecialArgs = { 
+          inherit sops-nix;
+          inherit inputs;
+        };
         modules = [
           {
             home.username = username;

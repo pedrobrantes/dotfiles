@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "bash-it": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1752406714,
+        "narHash": "sha256-mE2jDqzXQI8mumKd7wWLkC/9cWQG5b8kZ3LV/mhb8gs=",
+        "owner": "Bash-it",
+        "repo": "bash-it",
+        "rev": "8b5a8d4f315b0e74e74fa192a38ec643e888e9db",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Bash-it",
+        "repo": "bash-it",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -38,6 +54,7 @@
     },
     "root": {
       "inputs": {
+        "bash-it": "bash-it",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
         "sops-nix": "sops-nix"

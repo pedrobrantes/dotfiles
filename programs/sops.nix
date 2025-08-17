@@ -12,6 +12,7 @@
     secrets = {
       "gemini_api_key" = {
         sopsFile = ../secrets/api_keys.yaml;
+        format = "yaml";
         key = "gemini.primary";
       };
 

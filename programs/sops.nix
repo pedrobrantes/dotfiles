@@ -4,8 +4,6 @@
   home.packages = [ pkgs.sops ];
 
   sops = {
-    enable = true;
-
     age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
 
     age.sshKeyPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];

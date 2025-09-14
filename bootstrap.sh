@@ -4,6 +4,7 @@ set -euo pipefail
 # --- Configuration ---
 readonly GIT_REPO_URL="https://github.com/pedrobrantes/dotfiles.git"
 readonly BW_NOTE_NAME="sops-nix_age_private.key"
+readonly USERNAME="brantes"
 # --- End of Configuration ---
 
 # --- Script Variables ---
@@ -44,9 +45,15 @@ check_and_install_nix() {
   case "$choice" in
     y|Y )
       info "Running the official Nix installer..."
-      sh <(curl -L https://nixos.org/nix/install) --daemon
+      if [[ "$(uname -m)" == "aarch64" ]]; then
+        info "Detected aarch64 architecture. Installing Nix in single-user mode."
+        sh <(curl -L https://nixos.org/nix/install) --no-daemon
+      else
+        info "Detected x86_64 architecture. Installing Nix in multi-user mode."
+        sh <(curl -L https://nixos.org/nix/install) --daemon
+      fi
       warn "Nix has been installed. Please restart your shell or run 'source /etc/profile.d/nix.sh' and then run this script again."
-      exit 0
+      exit 0        
       ;;
     * )
       error "Nix is required to continue. Aborting."
@@ -110,7 +117,22 @@ main() {
   fi
 
   info "Applying Home Manager configuration..."
-  home-manager switch $NIX_FLAGS --flake ".#brantes"
+  
+  local arch
+  arch=$(uname -m)
+  local flake_target
+
+  if [[ "$arch" == "aarch64" ]]; then
+    flake_target=".#${USERNAME}-aarch64-linux"
+    info "Applying configuration for aarch64: ${flake_target}"
+  elif [[ "$arch" == "x86_64" ]]; then
+    flake_target=".#${USERNAME}-x86_64-linux"
+    info "Applying configuration for x86_64: ${flake_target}"
+  else
+    error "Unsupported architecture: ${arch}. Aborting."
+  fi
+
+  home-manager switch $NIX_FLAGS --flake "$flake_target"
 
   success "Bootstrap complete! Your declarative environment is ready."
   info "You can now permanently enable flakes by adding 'experimental-features = nix-command flakes' to your nix.conf file."

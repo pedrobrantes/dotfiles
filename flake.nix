@@ -15,7 +15,7 @@
 
   outputs = { self, nixpkgs, home-manager, sops-nix, bash-it }@inputs:
     let
-      mkHome = { username, system ? "x86_64-linux" }: home-manager.lib.homeManagerConfiguration {
+      mkHome = { username, system }: home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.${system};
         extraSpecialArgs = { 
           inherit sops-nix;
@@ -32,7 +32,8 @@
     in
     {
       homeConfigurations = {
-        "brantes" = mkHome { username = "brantes"; };
+        "brantes-x86_64-linux" = mkHome { username = "brantes"; system = "x86_64-linux"; };
+        "brantes-aarch64-linux" = mkHome { username = "brantes"; system = "aarch64-linux"; };
       };
     };
 }

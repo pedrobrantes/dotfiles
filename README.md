@@ -62,6 +62,8 @@ nix-shell -p bitwarden-cli --run "
 Finally, apply the configuration using Home Manager. This command needs the `flakes` experimental feature enabled for the first run.
 
 ```bash
+nix-shell -p home-manager git
+
 # For x86_64 architecture
 home-manager switch --flake .#brantes-x86_64-linux --extra-experimental-features 'nix-command flakes'
 

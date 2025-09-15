@@ -32,62 +32,44 @@ sh <(curl -L https://nixos.org/nix/install) --daemon
 ```
 After the installation, **close and reopen your terminal** to ensure the Nix environment is loaded.
 
-### 2. Install Home Manager
+### 2. Clone the Repository
 
-Next, install Home Manager, which is used to manage the user-specific environment.
-
-```bash
-nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager
-nix-channel --update
-nix-shell '<home-manager>' -A install
-```
-
-### 3. Clone This Repository
-
-Next, clone this repository into the correct directory (`~/.config/home-manager`).
+Next, enter a temporary shell that contains `git` and clone the repository.
 
 ```bash
-# This command uses a temporary git from nix-shell to clone the repo
 nix-shell -p git --run "git clone 'https://github.com/pedrobrantes/dotfiles.git' '${HOME}/.config/home-manager'"
+cd ~/.config/home-manager
 ```
 
-### 4. Configure Secrets with Bitwarden and SOPS
+### 3. Configure Secrets with Bitwarden and SOPS
 
 This configuration uses `sops-nix` to manage secrets, which are securely stored in Bitwarden.
 
-First, ensure you have `bitwarden-cli` available:
+First, get a shell with `bitwarden-cli` and log in:
 ```bash
-nix-shell -p bitwarden-cli
+nix-shell -p bitwarden-cli --run "
+  bw login
+  export BW_SESSION=\$(bw unlock --raw)
+  mkdir -p ~/.config/sops/age
+  bw get notes sops-nix_age_private.key | tee ~/.config/sops/age/keys.txt
+  chmod 600 ~/.config/sops/age/keys.txt
+  bw lock
+"
 ```
 
-Then, log in to Bitwarden and retrieve the SOPS private key:
-```bash
-# Log in to your Bitwarden account
-bw login
+### 4. Apply the Configuration
 
-# Unlock your vault and export the session key
-export BW_SESSION=$(bw unlock --raw)
-
-# Create the necessary directory for the age key
-mkdir -p ~/.config/sops/age
-
-# Retrieve the key from Bitwarden and save it
-bw get notes sops-nix_age_private.key | tee ~/.config/sops/age/keys.txt
-
-# Set the correct permissions for the key file
-chmod 600 ~/.config/sops/age/keys.txt
-```
-
-### 5. Apply the Configuration
-
-Finally, navigate to the repository directory and apply the configuration using Home Manager.
+Finally, apply the configuration using Home Manager. This command needs the `flakes` experimental feature enabled for the first run.
 
 ```bash
-cd ~/.config/home-manager
-home-manager switch --flake .#brantes-x86_64-linux # Or use -aarch64-linux
+# For x86_64 architecture
+home-manager switch --flake .#brantes-x86_64-linux --extra-experimental-features 'nix-command flakes'
+
+# For aarch64 architecture (example)
+# home-manager switch --flake .#brantes-aarch64-linux --extra-experimental-features 'nix-command flakes'
 ```
 
-Your environment is now fully configured!
+After the first successful run, your Nix configuration will permanently enable flakes and install Home Manager in your profile. You will no longer need the `--extra-experimental-features` flag for subsequent runs.
 
 </details>
 

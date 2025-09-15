@@ -135,7 +135,6 @@ main() {
   home-manager switch $NIX_FLAGS --flake "$flake_target"
 
   success "Bootstrap complete! Your declarative environment is ready."
-  info "You can now permanently enable flakes by adding 'experimental-features = nix-command flakes' to your nix.conf file."
 }
 
 main

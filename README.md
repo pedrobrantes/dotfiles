@@ -32,7 +32,17 @@ sh <(curl -L https://nixos.org/nix/install) --daemon
 ```
 After the installation, **close and reopen your terminal** to ensure the Nix environment is loaded.
 
-### 2. Clone This Repository
+### 2. Install Home Manager
+
+Next, install Home Manager, which is used to manage the user-specific environment.
+
+```bash
+nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager
+nix-channel --update
+nix-shell '<home-manager>' -A install
+```
+
+### 3. Clone This Repository
 
 Next, clone this repository into the correct directory (`~/.config/home-manager`).
 
@@ -41,7 +51,7 @@ Next, clone this repository into the correct directory (`~/.config/home-manager`
 nix-shell -p git --run "git clone 'https://github.com/pedrobrantes/dotfiles.git' '${HOME}/.config/home-manager'"
 ```
 
-### 3. Configure Secrets with Bitwarden and SOPS
+### 4. Configure Secrets with Bitwarden and SOPS
 
 This configuration uses `sops-nix` to manage secrets, which are securely stored in Bitwarden.
 
@@ -68,7 +78,7 @@ bw get notes sops-nix_age_private.key | tee ~/.config/sops/age/keys.txt
 chmod 600 ~/.config/sops/age/keys.txt
 ```
 
-### 4. Apply the Configuration
+### 5. Apply the Configuration
 
 Finally, navigate to the repository directory and apply the configuration using Home Manager.
 

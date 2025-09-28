@@ -25,5 +25,6 @@
     ./programs/sops.nix
     ./programs/nix.nix
     ./programs/bash.nix
+    ./programs/rsync.nix
   ];
 }

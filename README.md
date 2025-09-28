@@ -110,6 +110,18 @@ Now, install Nix in single-user mode (`--no-daemon`).
 sh <(curl -L https://nixos.org/nix/install) --no-daemon
 ```
 
-After this, you can proceed with the standard manual installation steps (cloning the repository, setting up secrets, and applying the configuration) from within the `proot-distro` environment.
+After installing Nix, follow the manual steps to clone the repository and configure secrets. Then, proceed to the final step below.
+
+#### 4. Apply the Configuration
+
+Finally, apply the Home Manager configuration. Since Android devices use the `aarch64` architecture, you must use the corresponding flake target.
+
+It is **highly recommended** to use the `-b backup` flag on the first run. This will back up any existing config files (like `.bashrc`) before Home Manager replaces them with symbolic links.
+
+```bash
+home-manager switch --flake .#brantes-aarch64-linux --extra-experimental-features 'nix-command flakes' -b backup
+```
+
+After the first successful run, you can omit the `--extra-experimental-features` and `-b backup` flags for future updates.
 
 </details>

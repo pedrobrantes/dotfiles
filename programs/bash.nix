@@ -6,24 +6,16 @@
     enableCompletion = true;
 
     shellAliases = {
-      ls = "eza --icons";
       cd = "z";
-      cat = "batcat";
-      find = "fdfind";
-      fd = "fdfind";
-      grep = "rg";
       top = "htop";
-      df = "duf";
       du = "dust --depth 10";
       ps = "procs";
       cp = "cp_progress";
       netstat = "ss";
       wexec = "watchexec";
       color = "pastel color";
-      nslookup = "doggo";
       traceroute = "mtr";
       tracepath = "mtr";
-      dig = "doggo";
       aria2 = "aria2c";
       locate = "plocate";
       benchmark = "hyperfine";

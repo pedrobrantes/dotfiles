@@ -26,5 +26,11 @@
     ./programs/nix.nix
     ./programs/bash.nix
     ./programs/rsync.nix
+    ./programs/eza.nix
+    ./programs/ripgrep.nix
+    ./programs/fd.nix
+    ./programs/bat.nix
+    ./programs/duf.nix
+    ./programs/doggo.nix
   ];
 }

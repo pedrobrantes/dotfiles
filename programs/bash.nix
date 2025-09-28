@@ -6,19 +6,13 @@
     enableCompletion = true;
 
     shellAliases = {
-      cd = "z";
-      top = "htop";
-      du = "dust --depth 10";
       ps = "procs";
       cp = "cp_progress";
-      netstat = "ss";
       wexec = "watchexec";
       color = "pastel color";
       traceroute = "mtr";
       tracepath = "mtr";
       aria2 = "aria2c";
-      locate = "plocate";
-      benchmark = "hyperfine";
       hex = "hexyl";
       fzf = "fzf --no-color";
       ips = "ip -c -br a";

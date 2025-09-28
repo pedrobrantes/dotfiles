@@ -32,5 +32,11 @@
     ./programs/bat.nix
     ./programs/duf.nix
     ./programs/doggo.nix
+    ./programs/zoxide.nix
+    ./programs/iproute2.nix
+    ./programs/plocate.nix
+    ./programs/hyperfine.nix
+    ./programs/htop.nix
+    ./programs/dust.nix
   ];
 }

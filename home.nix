@@ -38,5 +38,6 @@
     ./programs/hyperfine.nix
     ./programs/htop.nix
     ./programs/dust.nix
+    ./programs/github.nix
   ];
 }

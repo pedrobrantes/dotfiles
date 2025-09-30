@@ -1,6 +1,8 @@
 { config, pkgs, ... }:
 
 {
+  home.packages = [ pkgs.delta ];
+
   programs.git = {
     enable = true;
     userName = "PedroBrantes";

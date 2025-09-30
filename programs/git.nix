@@ -1,7 +1,10 @@
 { config, pkgs, ... }:
 
 {
-  home.packages = [ pkgs.delta ];
+  home.packages = [ 
+    pkgs.git
+    pkgs.delta
+  ];
 
   programs.git = {
     enable = true;

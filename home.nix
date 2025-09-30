@@ -10,11 +10,6 @@
     GEMINI_API_KEY = config.sops.secrets.gemini_api_key.path;
   };
 
-  # Packages
-  home.packages = with pkgs; [
-    git
-  ];
-
   # Programs modules
   imports = [
     sops-nix.homeManagerModules.sops

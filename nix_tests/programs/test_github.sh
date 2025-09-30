@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "--> Testing: gh module"
+echo "--> Testing: gh command in current environment"
 
-arch=$(uname -m)
-config_path=$(nix build .#homeConfigurations.brantes-${arch}-linux.activationPackage --no-link --print-out-paths)
-
-if [ ! -f "$config_path/bin/gh" ]; then
-    echo "FAIL: gh binary not found in the built environment." >&2
+if ! command -v gh &> /dev/null; then
+    echo "FAIL: The 'gh' command was not found in the current environment's PATH." >&2
     exit 1
 fi
-echo "OK: gh package is installed."
+echo "OK: The 'gh' command is installed and available."
 
-gh_config_file="$config_path/home-files/.config/gh/config.yml"
-if ! grep -q "git_protocol: ssh" "$gh_config_file"; then
-    echo "FAIL: 'git_protocol' is not set to 'ssh' in gh config." >&2
-    cat "$gh_config_file" >&2
+git_protocol=$(gh config get git_protocol 2>/dev/null || true)
+
+if [[ "$git_protocol" != "ssh" ]]; then
+    echo "FAIL: 'git_protocol' is '$git_protocol', but 'ssh' was expected." >&2
     exit 1
 fi
-echo "OK: gh git_protocol is correctly set."
+echo "OK: The gh 'git_protocol' is correctly set to 'ssh'."
+

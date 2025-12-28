@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [ du-dust ];
+  home.packages = with pkgs; [ dust ];
   programs.bash.shellAliases = {
     du = "dust --depth 10";
   };

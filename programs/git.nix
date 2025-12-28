@@ -353,10 +353,10 @@
           git commit -m \"wip$${_scope:+($${_scope})}$${_attention}:$${_message}\"
         }; a
       '';
-    };
 
-    # Aliases
-    alias = {
+      # Aliases
+      alias = {
+      };
     };
   };
 }

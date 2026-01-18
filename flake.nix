@@ -20,7 +20,7 @@
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-master, home-manager, sops-nix, bash-it }@inputs:
     let
-      mkHome = { username, system }:
+      mkHome = { system, configPath }:
         let
           config = { allowUnfree = true; };
           pkgs = import nixpkgs { inherit system config; };
@@ -33,18 +33,22 @@
             inherit sops-nix inputs pkgsUnstable pkgsMaster;
           };
           modules = [
-            {
-              home.username = username;
-              home.homeDirectory = "/home/${username}";
-            }
-            ./home.nix
+            configPath
+            sops-nix.homeManagerModules.sops
           ];
         };
     in
     {
       homeConfigurations = {
-        "brantes-x86_64-linux" = mkHome { username = "brantes"; system = "x86_64-linux"; };
-        "brantes-aarch64-linux" = mkHome { username = "brantes"; system = "aarch64-linux"; };
+        "brantes@x86_64.wsl.desktop" = mkHome { 
+          system = "x86_64-linux"; 
+          configPath = ./machines/x86_64/wsl/desktop/default.nix; 
+        };
+
+        "brantes@aarch64.android.smartphone" = mkHome { 
+          system = "aarch64-linux"; 
+          configPath = ./machines/aarch64/android/smartphone/default.nix; 
+        };
       };
     };
 }

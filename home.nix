@@ -13,27 +13,6 @@
   # Programs modules
   imports = [
     sops-nix.homeManagerModules.sops
-    ./programs/python.nix
-    ./programs/git.nix
-    ./programs/syncthing.nix
-    ./programs/bitwarden.nix
-    ./programs/sops.nix
-    ./programs/nix.nix
-    ./programs/bash.nix
-    ./programs/rsync.nix
-    ./programs/eza.nix
-    ./programs/ripgrep.nix
-    ./programs/fd.nix
-    ./programs/bat.nix
-    ./programs/duf.nix
-    ./programs/doggo.nix
-    ./programs/zoxide.nix
-    ./programs/iproute2.nix
-    ./programs/plocate.nix
-    ./programs/hyperfine.nix
-    ./programs/htop.nix
-    ./programs/dust.nix
-    ./programs/github.nix
-    ./programs/gemini.nix
+    ./programs
   ];
 }

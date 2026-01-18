@@ -1,34 +1,34 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-ARCH=$(uname -m)
-KERNEL_RELEASE=$(uname -r)
-VERSION_INFO=$(cat /proc/version 2>/dev/null)
+info() { echo -e "\033[0;34m[INFO]\033[0m $1"; }
+warn() { echo -e "\033[0;33m[WARNING]\033[0m $1"; }
 
-if echo "$KERNEL_RELEASE" | grep -q "Microsoft" || echo "$VERSION_INFO" | grep -q "Microsoft"; then
-    OS="wsl"
-    DEVICE="desktop"
+arch=$(uname -m)
+os="linux"
+device="desktop"
 
-elif echo "$KERNEL_RELEASE" | grep -qi "proot" || [ -n "$TERMUX_VERSION" ]; then
-    OS="android"
-    DEVICE="smartphone"
-
-else
-    OS="linux"
-    CURRENT_HOSTNAME=$(hostname)
-    if [ "$CURRENT_HOSTNAME" == "localhost" ]; then
-        echo "Warning: Hostname is localhost. Please set a hostname."
-        DEVICE="unknown"
-    else
-        DEVICE="$CURRENT_HOSTNAME"
-    fi
+if [ -d "/data/data/com.termux" ] || [ -f "/system/build.prop" ]; then
+    os="android"
+    device="smartphone"
+elif grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null; then
+    os="wsl"
+    device="desktop"
 fi
 
-FLAKE_URI="brantes@${ARCH}.${OS}.${DEVICE}"
+target="brantes@${arch}.${os}.${device}"
 
-echo "Environment Detected:"
-echo "   Arch:   $ARCH"
-echo "   OS:     $OS"
-echo "   Device: $DEVICE"
-echo "Applying: .#${FLAKE_URI}"
+info "Environment Detected: ${arch} | ${os} | ${device}"
+info "Applying target: .#${target}"
 
-home-manager switch --flake ".#${FLAKE_URI}"
+home-manager switch --flake ".#${target}"
+
+if [[ "$os" == "android" ]]; then
+    if [ -d "/homeless-shelter" ]; then
+        warn "Cleaning up /homeless-shelter..."
+        rm -rf /homeless-shelter
+	home-manager switch --flake ".#${target}"
+    fi
+    export HOME="/home/brantes"
+fi
+

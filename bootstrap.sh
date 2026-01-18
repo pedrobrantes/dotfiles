@@ -19,19 +19,10 @@ readonly COLOR_YELLOW='\033[0;33m'
 readonly COLOR_RED='\033[0;31m'
 readonly COLOR_RESET='\033[0m'
 
-info() {
-  echo -e "${COLOR_BLUE}[INFO]${COLOR_RESET} $1"
-}
-success() {
-  echo -e "${COLOR_GREEN}[SUCCESS]${COLOR_RESET} $1"
-}
-warn() {
-  echo -e "${COLOR_YELLOW}[WARNING]${COLOR_RESET} $1"
-}
-error() {
-  echo -e "${COLOR_RED}[ERROR]${COLOR_RESET} $1" >&2
-  exit 1
-}
+info() { echo -e "${COLOR_BLUE}[INFO]${COLOR_RESET} $1"; }
+success() { echo -e "${COLOR_GREEN}[SUCCESS]${COLOR_RESET} $1"; }
+warn() { echo -e "${COLOR_YELLOW}[WARNING]${COLOR_RESET} $1"; }
+error() { echo -e "${COLOR_RED}[ERROR]${COLOR_RESET} $1" >&2; exit 1; }
 
 # --- Prerequisite Functions ---
 check_and_install_nix() {
@@ -46,14 +37,19 @@ check_and_install_nix() {
     y|Y )
       info "Running the official Nix installer..."
       if [[ "$(uname -m)" == "aarch64" ]]; then
-        info "Detected aarch64 architecture. Installing Nix in single-user mode."
+        info "Detected aarch64 architecture. Installing Nix in single-user mode (Android/Termux)."
         sh <(curl -L https://nixos.org/nix/install) --no-daemon
       else
         info "Detected x86_64 architecture. Installing Nix in multi-user mode."
         sh <(curl -L https://nixos.org/nix/install) --daemon
       fi
-      warn "Nix has been installed. Please restart your shell or run 'source /etc/profile.d/nix.sh' and then run this script again."
-      exit 0        
+      
+      warn "Nix installed. Setting up environment variables for this session..."
+      if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+        . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+      elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+      fi
       ;;
     * )
       error "Nix is required to continue. Aborting."
@@ -63,7 +59,8 @@ check_and_install_nix() {
 
 clone_config_repo() {
   if [ -d "$CONFIG_DIR" ]; then
-    info "Configuration directory already exists at ${CONFIG_DIR}. Skipping clone."
+    info "Configuration directory already exists at ${CONFIG_DIR}. Pulling latest changes..."
+    cd "$CONFIG_DIR" && git pull
     return
   fi
 
@@ -72,10 +69,28 @@ clone_config_repo() {
     git clone "$GIT_REPO_URL" "$CONFIG_DIR"
   else
     warn "Git not found. Using nix-shell to provide a temporary Git environment."
-    nix-shell $NIX_FLAGS -p git --run "git clone '$GIT_REPO_URL' '$CONFIG_DIR'"
+    nix-shell -p git --run "git clone '$GIT_REPO_URL' '$CONFIG_DIR'"
   fi
 }
 
+detect_target() {
+    local arch=$(uname -m)
+    local os="linux"
+    local device="desktop"
+    local system_target=""
+
+    if [[ -n "${TERMUX_VERSION:-}" ]]; then
+        os="android"
+        device="smartphone"
+    elif grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null; then
+        os="wsl"
+        device="desktop"
+    fi
+
+    system_target="${USERNAME}@${arch}.${os}.${device}"
+
+    echo "$system_target"
+}
 
 # --- Main Logic ---
 main() {
@@ -83,58 +98,68 @@ main() {
 
   check_and_install_nix
   clone_config_repo
+  
   cd "$CONFIG_DIR"
 
+  # --- Bitwarden / SOPS Logic ---
   if [ -f "$SOPS_AGE_KEY_FILE" ]; then
-    success "Sops key file already exists at ${SOPS_AGE_KEY_FILE}. Skipping Bitwarden."
+    success "Sops key file already exists. Skipping Bitwarden."
   else
     info "Sops key file not found. Starting Bitwarden workflow."
     warn "You will be prompted for your Bitwarden credentials."
-
-    nix-shell $NIX_FLAGS -p bitwarden-cli --run "
+    
+    # Using 'nix shell' to fetch bitwarden-cli temporarily
+    nix-shell -p bitwarden-cli --run "
       set -euo pipefail
       if ! bw status | grep -q '\"status\":\"unlocked\"'; then
-        if ! bw status | grep -q '\"status\":\"locked\"'; then
           echo '[INFO] Logging in to Bitwarden...'
           bw login
-        fi
       fi
+      
       echo '[INFO] Unlocking Bitwarden vault...'
       export BW_SESSION=\$(bw unlock --raw)
-      if [ -z \"\$BW_SESSION\" ]; then
-        echo '[ERROR] Failed to unlock Bitwarden vault.' >&2
-        exit 1
-      fi
-      echo '[SUCCESS] Vault unlocked.'
+      
       mkdir -p \"$(dirname "$SOPS_AGE_KEY_FILE")\"
       echo '[INFO] Fetching sops key from Bitwarden note: ${BW_NOTE_NAME}'
       bw get notes \"$BW_NOTE_NAME\" > \"$SOPS_AGE_KEY_FILE\"
       chmod 600 \"$SOPS_AGE_KEY_FILE\"
+      
       bw lock
       echo '[INFO] Bitwarden vault locked.'
     "
-    success "Sops key file created successfully at ${SOPS_AGE_KEY_FILE}"
+    success "Sops key file created successfully."
+  fi
+
+  # --- Flake Selection ---
+  local flake_target
+  flake_target=$(detect_target)
+  
+  info "Detected Environment Target: ${flake_target}"
+  read -p "Is this target correct? [Y/n] " confirm
+  if [[ "$confirm" =~ ^[Nn]$ ]]; then
+      read -p "Please enter the full flake output name (e.g., brantes@x86_64.wsl.desktop): " manual_target
+      flake_target="$manual_target"
   fi
 
   info "Applying Home Manager configuration..."
-  
-  local arch
-  arch=$(uname -m)
-  local flake_target
 
-  if [[ "$arch" == "aarch64" ]]; then
-    flake_target=".#${USERNAME}-aarch64-linux"
-    info "Applying configuration for aarch64: ${flake_target}"
-  elif [[ "$arch" == "x86_64" ]]; then
-    flake_target=".#${USERNAME}-x86_64-linux"
-    info "Applying configuration for x86_64: ${flake_target}"
-  else
-    error "Unsupported architecture: ${arch}. Aborting."
+  # --- The Activation ---
+  mkdir -p ~/.config/nix
+  if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
+      echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
   fi
 
-  home-manager switch $NIX_FLAGS --flake "$flake_target"
+  if [[ "$os" == "android" ]]; then
+    info "Running Android-specific environment fixes..."
+    [ -d "/homeless-shelter" ] && sudo rm -rf /homeless-shelter && rm -rf /homeless-shelter/
+    export HOME="/home/${USERNAME}"
+  fi
 
-  success "Bootstrap complete! Your declarative environment is ready."
+  nix run --extra-experimental-features "nix-command flakes" \
+      home-manager -- switch --flake ".#${flake_target}"
+
+  success "Bootstrap complete! Your declarative setup is ready."
+  warn "Please restart your shell to apply all changes."
 }
 
 main

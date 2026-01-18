@@ -34,5 +34,6 @@
     ./programs/htop.nix
     ./programs/dust.nix
     ./programs/github.nix
+    ./programs/gemini.nix
   ];
 }

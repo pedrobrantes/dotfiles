@@ -1,5 +1,8 @@
 { config, pkgs, lib, ... }:
 
+let
+  hostName = "aarch64.android.smartphone";
+in
 {
   imports = [ ../../../../home.nix ];
 
@@ -14,13 +17,15 @@
     mode = "0600";
   };
 
-  home.activation.setHostname = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    CURRENT_HOSTNAME=$(cat /etc/hostname 2>/dev/null || hostname)
-    DESIRED_HOSTNAME="smartphone"
+  home.sessionVariables = {
+    HOSTNAME = hostName;
+  };
 
-    if [ "$CURRENT_HOSTNAME" != "$DESIRED_HOSTNAME" ]; then
-      $DRY_RUN_CMD echo "$DESIRED_HOSTNAME" > /etc/hostname
-      $DRY_RUN_CMD hostname "$DESIRED_HOSTNAME"
-    fi
+  programs.zsh.initExtra = ''
+    export PROMPT="%F{yellow}%n%f@%F{green}${hostName}%f:%F{blue}%~%f%# "
+  '';
+
+  programs.bash.initExtra = ''
+    export PS1="\[\033[01;33m\]\u\[\033[00m\]@\[\033[01;32m\]${hostName}\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
   '';
 }

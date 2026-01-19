@@ -15,7 +15,7 @@
   };
 
   home.activation.setHostname = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    DESIRED_HOSTNAME="desktop"
+    DESIRED_HOSTNAME="x86_64.wsl.desktop"
     if [ "$(hostname)" != "$DESIRED_HOSTNAME" ]; then
       if command -v sudo > /dev/null; then
          $DRY_RUN_CMD sudo hostname "$DESIRED_HOSTNAME"

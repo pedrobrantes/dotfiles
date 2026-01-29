@@ -28,4 +28,10 @@ in
   programs.bash.initExtra = ''
     export PS1="\[\033[01;33m\]\u\[\033[00m\]@\[\033[01;32m\]${hostName}\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
   '';
+
+  xdg.configFile."nix/nix.conf".text = ''
+    sandbox = false
+    connect-timeout = 20
+    max-jobs = 1
+  '';
 }

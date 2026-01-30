@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   xdg.configFile."nix/nix.conf".text = ''
@@ -8,4 +8,8 @@
   nix.registry.nixpkgs.flake = inputs.nixpkgs;
 
   home.sessionVariables.NIX_PATH = "nixpkgs=${inputs.nixpkgs}";
+
+  home.packages = [
+    pkgs.nh
+  ];
 }

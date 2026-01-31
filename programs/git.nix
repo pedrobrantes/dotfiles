@@ -1,12 +1,20 @@
 { config, pkgs, ... }:
 
 {
+  home.packages = [ 
+    pkgs.git
+    pkgs.delta
+  ];
+
   programs.git = {
     enable = true;
-    userName = "PedroBrantes";
-    userEmail = "58346706+PedroBrantes@users.noreply.github.com";
+    
+    settings = {
+      user = {
+        name = "PedroBrantes";
+        email = "58346706+PedroBrantes@users.noreply.github.com";
+      };
 
-    extraConfig = {
       # Credential helpers
       "credential \"https://github.com\"".helper = "!/usr/bin/gh auth git-credential";
       "credential \"https://gist.github.com\"".helper = "!/usr/bin/gh auth git-credential";
@@ -345,10 +353,10 @@
           git commit -m \"wip$${_scope:+($${_scope})}$${_attention}:$${_message}\"
         }; a
       '';
-    };
 
-    # Aliases
-    aliases = {
+      # Aliases
+      alias = {
+      };
     };
   };
 }

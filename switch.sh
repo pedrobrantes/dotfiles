@@ -23,14 +23,13 @@ target="brantes@${arch}.${os}.${device}"
 info "Environment Detected: ${arch} | ${os} | ${device}"
 
 # --- Test Enforcement ---
-info "Running configuration tests..."
-if [ -x "./tests/run_all.sh" ]; then
-    if ! ./tests/run_all.sh; then
-        error "Tests failed! Aborting switch to prevent broken configuration."
-    fi
+info "Running configuration tests (via Pytest)..."
+
+# Run pytest inside a temporary nix-shell with python3 and pytest
+if nix-shell -p python3Packages.pytest --run "pytest tests/"; then
     success "All tests passed."
 else
-    warn "Test runner (./tests/run_all.sh) not found or not executable."
+    error "Tests failed! Aborting switch to prevent broken configuration."
 fi
 # ------------------------
 

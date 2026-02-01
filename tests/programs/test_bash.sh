@@ -4,8 +4,8 @@ set -euo pipefail
 echo "--> Testing: programs/bash.nix"
 
 # Build the home-manager configuration for a specific architecture
-arch=$(uname -m)
-nix-build .#brantes-${arch}-linux --out-link result-bash-test
+target=$($(dirname "$0")/../get_target.sh)
+nix-build .#${target}.activationPackage --out-link result-bash-test
 
 # Check if the BASH_IT export is in the generated bashrc
 BASHRC_PATH="result-bash-test/home-files/.bashrc"

@@ -4,8 +4,8 @@ set -euo pipefail
 echo "--> Testing: bat module"
 
 # Build the home-manager configuration
-arch=$(uname -m)
-config_path=$(nix-build .#brantes-${arch}-linux --no-out-link)
+target=$($(dirname "$0")/../get_target.sh)
+config_path=$(nix-build .#${target}.activationPackage --no-out-link)
 
 # 1. Check for package binary
 if [ ! -f "$config_path/bin/bat" ]; then

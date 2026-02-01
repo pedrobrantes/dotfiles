@@ -1,2 +1,4 @@
 secrets/*.age
 secrets/*.key
+tests/__pycache__/
+tests/*/__pycache__/

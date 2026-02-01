@@ -21,6 +21,19 @@ fi
 target="brantes@${arch}.${os}.${device}"
 
 info "Environment Detected: ${arch} | ${os} | ${device}"
+
+# --- Test Enforcement ---
+info "Running configuration tests..."
+if [ -x "./tests/run_all.sh" ]; then
+    if ! ./tests/run_all.sh; then
+        error "Tests failed! Aborting switch to prevent broken configuration."
+    fi
+    success "All tests passed."
+else
+    warn "Test runner (./tests/run_all.sh) not found or not executable."
+fi
+# ------------------------
+
 info "Applying target: .#${target}"
 
 home-manager switch --flake ".#${target}"

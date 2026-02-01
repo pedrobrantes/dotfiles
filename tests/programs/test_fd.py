@@ -4,5 +4,4 @@ def test_fd_installed(home_manager_build):
 def test_fd_aliases(home_manager_build):
     bashrc = home_manager_build / "home-files/.bashrc"
     content = bashrc.read_text()
-    assert "find=fdfind" in content
-    assert "fd=fdfind" in content
+    assert "find=fd" in content

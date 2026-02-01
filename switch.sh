@@ -22,16 +22,12 @@ target="brantes@${arch}.${os}.${device}"
 
 info "Environment Detected: ${arch} | ${os} | ${device}"
 
-# --- Test Enforcement ---
 info "Running configuration tests (via Pytest)..."
-
-# Run pytest inside a temporary nix-shell with python3 and pytest
 if nix-shell -p python3Packages.pytest --run "pytest tests/"; then
     success "All tests passed."
 else
     error "Tests failed! Aborting switch to prevent broken configuration."
 fi
-# ------------------------
 
 info "Applying target: .#${target}"
 
@@ -45,4 +41,3 @@ if [[ "$os" == "android" ]]; then
     fi
     export HOME="/home/brantes"
 fi
-

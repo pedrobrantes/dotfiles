@@ -45,6 +45,12 @@
           configPath = ./machines/x86_64/wsl/desktop/default.nix; 
         };
 
+        # Generic Linux target (useful for CI/CD on ubuntu-latest)
+        "brantes@x86_64.linux.desktop" = mkHome { 
+          system = "x86_64-linux"; 
+          configPath = ./machines/x86_64/linux/desktop/default.nix; 
+        };
+
         "brantes@aarch64.android.smartphone" = mkHome { 
           system = "aarch64-linux"; 
           configPath = ./machines/aarch64/android/smartphone/default.nix; 

@@ -39,7 +39,22 @@ git checkout -b feature/add-btop-config
 
 Make your changes to the `.nix` files, preferably by creating a new, self-contained module.
 
-**Crucially, for any new functionality, add a corresponding test** in the `nix_tests` directory. This ensures our CI pipeline can validate your changes automatically. (See the [TEST TEMPLATES](./nix_tests/TEST_TEMPLATES.md) for examples).
+**Crucially, for any new functionality, add a corresponding test** in the `tests/programs` directory.
+The project uses **Python + Pytest** for integration testing. The build is validated automatically.
+
+1.  Create a file named `tests/programs/test_<program>.py`.
+2.  Use the `home_manager_build` fixture to inspect the build output.
+3.  (See [TEST TEMPLATES](./tests/TEST_TEMPLATES.md) for examples).
+
+**Running Tests Locally:**
+
+You can run the full test suite using `nix-shell`:
+
+```bash
+nix-shell -p python3Packages.pytest --run "pytest tests/"
+```
+
+Alternatively, just run `./switch.sh`, which automatically runs tests before applying changes.
 
 #### 3. Commit and Push
 

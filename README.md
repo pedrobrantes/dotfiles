@@ -8,7 +8,7 @@ For details on how to add new configurations and run tests, please see the [**De
 
 ## Setup on a New Machine
 
-The recommended way to set up a new machine is to use the `bootstrap.sh` script. It automates the entire process: installing Nix, cloning the repository, retrieving secrets from Bitwarden, and applying the correct configuration for the detected device.
+The recommended way to set up a new machine is to use the `bootstrap.sh` script. It automates the entire process: installing Nix, cloning the repository, retrieving secrets from Bitwarden, running integration tests, and applying the correct configuration for the detected device.
 
 Just run the following command in your terminal:
 

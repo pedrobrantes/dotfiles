@@ -1,95 +1,66 @@
+# Test Templates (Python/Pytest)
+
+We use **Pytest** for integration testing. All tests are located in the `tests/` directory.
+A global fixture `home_manager_build` (defined in `tests/conftest.py`) builds the Home Manager configuration once and returns the path to the result.
+
 ### Base Template
 
-This is the clean structure to be used for all test files.
+Create a new file `tests/programs/test_<program_name>.py`.
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo "--> Testing: <program_name> <test_name>"
-# <test_logic>
-echo "OK: <program_name> <test_function> is correct."
+```python
+def test_<program_name>_installed(home_manager_build):
+    """Verifies that the program binary is installed."""
+    # The 'home_manager_build' fixture is the Path to the build result
+    binary = home_manager_build / "home-path/bin/<binary_name>"
+    
+    assert binary.exists()
+    assert binary.is_file()
 ```
 
 -----
 
 ### Practical Examples
 
-Here is how you implement the `<test_logic>` for common scenarios.
+#### 1. Checking for a Binary
 
-#### 1\. To Check if a Command Exists
+This test checks if `nvim` is installed in the environment.
 
-This test verifies that the `nvim` executable is available in the `$PATH`.
+**`tests/programs/test_neovim.py`**
 
-**`nix_tests/tools/test_nvim_exists.sh`**
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo "--> Testing: Neovim Installation"
-if ! command -v nvim &> /dev/null; then
-    echo "FAIL: nvim command not found." >&2
-    exit 1
-fi
-echo "OK: nvim command is available in PATH."
+```python
+def test_neovim_installed(home_manager_build):
+    nvim_bin = home_manager_build / "home-path/bin/nvim"
+    assert nvim_bin.exists()
 ```
 
-#### 2\. To Check an Environment Variable's Value
+#### 2. Checking Configuration File Content
 
-This test verifies that the `$EDITOR` environment variable is set to `nvim`.
+This verifies that the Git config file contains a specific string.
 
-**`nix_tests/env/test_editor_variable.sh`**
+**`tests/programs/test_git.py`**
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo "--> Testing: Editor Environment Variable"
-expected="nvim"
-actual="${EDITOR:-not_set}"
-if [[ "$actual" != "$expected" ]]; then
-    echo "FAIL: EDITOR is '$actual', expected '$expected'." >&2
-    exit 1
-fi
-echo "OK: EDITOR is set to nvim."
+```python
+def test_git_user_name(home_manager_build):
+    # Note: Configuration files are usually linked in 'home-files'
+    git_config = home_manager_build / "home-files/.config/git/config"
+    
+    assert git_config.exists()
+    
+    content = git_config.read_text()
+    assert "name = Pedro Brantes" in content
 ```
 
-#### 3\. To Check if a Configuration File Exists
+#### 3. Checking Aliases in .bashrc
 
-This test verifies that the git configuration file has been created at the expected path.
+Since aliases are often functions or exports in `.bashrc`, we check the content of that file.
 
-**`nix_tests/git/test_config_exists.sh`**
+**`tests/programs/test_aliases.py`**
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo "--> Testing: Git Config File Existence"
-config_file="$HOME/.config/git/config"
-if [[ ! -f "$config_file" ]]; then
-    echo "FAIL: Git config file not found at $config_file." >&2
-    exit 1
-fi
-echo "OK: Git config file exists."
-```
-
-#### 4\. To Check a File's Content
-
-This test verifies that your name is correctly set inside the git config file.
-
-**`nix_tests/git/test_user_name.sh`**
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo "--> Testing: Git User Name"
-config_file="$HOME/.config/git/config"
-expected_line="name = Pedro Brantes"
-if ! grep -q "$expected_line" "$config_file"; then
-    echo "FAIL: User name not found or incorrect in $config_file." >&2
-    exit 1
-fi
-echo "OK: Git user name is correct."
+```python
+def test_bat_alias(home_manager_build):
+    bashrc = home_manager_build / "home-files/.bashrc"
+    content = bashrc.read_text()
+    
+    # Check for the alias definition
+    assert 'alias cat="bat"' in content
 ```

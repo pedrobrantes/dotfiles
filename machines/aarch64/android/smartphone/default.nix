@@ -34,4 +34,6 @@ in
     connect-timeout = 20
     max-jobs = 1
   '';
+
+  programs.udocker.enable = true;
 }

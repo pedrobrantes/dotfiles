@@ -66,4 +66,6 @@
       "powertoys.hosts" = "$WIN_PROGRAM_FILES/PowerToys/WinUI3Apps/PowerToys.Hosts.exe";
       hosts = "$WIN_PROGRAM_FILES/PowerToys/WinUI3Apps/PowerToys.Hosts.exe";
   };
+
+  programs.docker-cli.enable = true;
 }

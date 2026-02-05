@@ -26,4 +26,6 @@
       fi
     fi
   '';
+
+  programs.docker-cli.enable = true;
 }

@@ -35,6 +35,18 @@
       neofetch = "fastfetch";
     };
 
+    profileExtra = ''
+      if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+      fi
+
+      # Switch to Nix bash if interactive and not already bash
+      if [ -z "$BASH_VERSION" ] && [ -x "$HOME/.nix-profile/bin/bash" ]; then
+        export SHELL="$HOME/.nix-profile/bin/bash"
+        exec "$SHELL" -l
+      fi
+    '';
+
     initExtra = ''
       # Function for 'cp' with a progress bar using rsync
       cp_progress() {

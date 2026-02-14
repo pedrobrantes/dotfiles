@@ -2,6 +2,6 @@
 
 {
   home.packages = [
-    pkgs.busybox
+    pkgs.diffutils
   ];
 }

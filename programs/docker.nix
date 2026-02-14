@@ -1,10 +1,10 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.programs.docker-cli;
+  cfg = config.programs.custom-docker-cli;
 in
 {
-  options.programs.docker-cli = {
+  options.programs.custom-docker-cli = {
     enable = lib.mkEnableOption "docker cli tools";
   };
 

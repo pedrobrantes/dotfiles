@@ -10,6 +10,11 @@ arch=$(uname -m)
 os="linux"
 device="desktop"
 
+# Ensure Nix is loaded
+if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+fi
+
 if [ -d "/data/data/com.termux" ] || [ -f "/system/build.prop" ]; then
     os="android"
     device="smartphone"

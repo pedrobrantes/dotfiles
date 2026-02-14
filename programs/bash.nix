@@ -76,8 +76,16 @@
     '';
   };
 
-  home.sessionVariables = {
-    FZF_DEFAULT_OPTS = "--height=60% --border --no-color";
-    _ZO_FZF_OPTS = "--no-color";
-  };
-}
+    home.sessionVariables = {
+
+      FZF_DEFAULT_OPTS = "--height=60% --border --no-color";
+
+      _ZO_FZF_OPTS = "--no-color";
+
+      SHELL = "${pkgs.bash}/bin/bash";
+
+    };
+
+  }
+
+  

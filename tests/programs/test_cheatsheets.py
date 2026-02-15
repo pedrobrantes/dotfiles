@@ -18,4 +18,5 @@ def test_cheatsheets_installed(home_manager_build):
     cmd_cheat = [str(cheat_path), "--version"]
     res_cheat = subprocess.run(cmd_cheat, capture_output=True, text=True)
     assert res_cheat.returncode == 0
-    assert "cheat" in res_cheat.stdout
+    assert len(res_cheat.stdout.strip()) > 0
+    assert res_cheat.stdout.strip()[0].isdigit()

@@ -16,9 +16,11 @@
       url = "github:Bash-it/bash-it";
       flake = false;
     };
+
+    nixpkgs-pr-489276.url = "github:nixos/nixpkgs/pull/489276/head";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-master, home-manager, sops-nix, bash-it }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-master, home-manager, sops-nix, bash-it, ... }@inputs:
     let
       mkHome = { system, configPath }:
         let
@@ -26,11 +28,17 @@
           pkgs = import nixpkgs { inherit system config; };
           pkgsUnstable = import nixpkgs-unstable { inherit system config; };
           pkgsMaster = import nixpkgs-master { inherit system config; };
+
+          lib = pkgs.lib;
+          pkgsPr = lib.mapAttrs' (name: value: {
+            name = lib.removePrefix "nixpkgs-pr-" name;
+            value = import value { inherit system config; };
+          }) (lib.filterAttrs (name: _: lib.hasPrefix "nixpkgs-pr-" name) inputs);
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = {
-            inherit sops-nix inputs pkgsUnstable pkgsMaster;
+            inherit sops-nix inputs pkgsUnstable pkgsMaster pkgsPr;
           };
           modules = [
             configPath

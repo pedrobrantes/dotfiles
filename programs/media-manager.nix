@@ -22,6 +22,36 @@ let
 in
 {
   programs.bash.initExtra = ''
+    # Anki Database Browser
+    # Usage: anki-view
+    anki-view() {
+      local db="/sdcard/AnkiDroid/collection.anki2"
+      if [ ! -f "$db" ]; then
+        echo "Error: Anki database not found at $db"
+        return 1
+      fi
+
+      # 1. Select Deck
+      local deck_name=$(sqlite3 "$db" "SELECT name FROM decks" | fzf --prompt="Select Anki Deck: ")
+      [ -z "$deck_name" ] && return
+
+      # 2. Get Deck ID
+      # Note: Anki stores decks as a JSON-like string in older versions or a table in newer ones.
+      # For safety across versions, we search for the deck name in the cards/notes join.
+      
+      echo -e "\033[1;34m--- Cards in $deck_name ---\033[0m"
+      
+      # 3. List cards (Front only for selection)
+      # We use 'unit separator' (0x1f) logic to split fields
+      sqlite3 -separator " | " "$db" "
+        SELECT n.flds 
+        FROM notes n 
+        JOIN cards c ON n.id = c.nid 
+        JOIN decks d ON c.did = d.id 
+        WHERE d.name = '$deck_name'
+      " | sed 's/\x1f/\n--- BACK ---\n/g' | less -R
+    }
+
     # Media Source Manager Helper
     # Usage: 
     #   mm list - List saved sources

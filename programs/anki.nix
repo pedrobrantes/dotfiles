@@ -19,9 +19,15 @@ in
       echo -e "\033[1;34m--- Syncing Obsidian to Anki (API) ---\033[0m"
       for file in "$cards_dir"/*.md; do
         [ -e "$file" ] || continue
-        local deck=$(basename "$file" .md)
+        
+        # Get filename without extension
+        local base_name=$(basename "$file" .md)
+        
+        # Format deck name: kebab-case -> Title Case
+        # Example: linux-basics -> Linux Basics
+        local deck=$(echo "$base_name" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1')
+        
         echo "Processing: $deck"
-        # We pass dummy DB path for compatibility
         anki-sync-internal "http://localhost:8765" "$deck" "$file"
       done
       echo -e "\033[1;32mSync Complete!\033[0m"

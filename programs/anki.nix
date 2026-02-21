@@ -1,7 +1,6 @@
 { pkgs, ... }:
 
 let
-  # Modular Scripts from the store
   ankiSyncTool = pkgs.writers.writePython3Bin "anki-sync-internal" { } 
     (builtins.readFile ../scripts/python/anki_sync.py);
 
@@ -12,27 +11,36 @@ in
   home.packages = [ ankiSyncTool ankiViewTool ];
 
   programs.bash.initExtra = ''
-    # --- Anki study tools ---
+    # --- Anki API study tools (via AnkiConnect Android) ---
+    
+    # Sync notes from Obsidian to Anki
     anki-sync() {
-      local db="/sdcard/AnkiDroid/collection.anki2"
       local cards_dir="/mnt/sdcard/Sync/Obsidian/My Notes/2-flashcards"
-      if [ ! -f "$db" ]; then echo "Error: Anki DB not found"; return 1; fi
-      echo -e "\033[1;34m--- Syncing Obsidian to Anki ---\033[0m"
+      echo -e "\033[1;34m--- Syncing Obsidian to Anki (API) ---\033[0m"
       for file in "$cards_dir"/*.md; do
         [ -e "$file" ] || continue
         local deck=$(basename "$file" .md)
         echo "Processing: $deck"
-        anki-sync-internal "$db" "$deck" "$file"
+        # We pass dummy DB path for compatibility
+        anki-sync-internal "http://localhost:8765" "$deck" "$file"
       done
       echo -e "\033[1;32mSync Complete!\033[0m"
     }
 
+    # Browse Anki decks in terminal
     anki-view() {
-      local db="/sdcard/AnkiDroid/collection.anki2"
-      if [ ! -f "$db" ]; then echo "Error: Anki DB not found"; return 1; fi
-      local deck_name=$(sqlite3 "$db" "SELECT name FROM decks" | fzf --prompt="Select Deck: ")
+      # Use curl to get deck names for fzf selection
+      local decks=$(curl -s -X POST http://localhost:8765 -d '{"action": "deckNames", "version": 6}' | python3 -c "import sys, json; print('\n'.join(json.load(sys.stdin)['result']))")
+      
+      if [ -z "$decks" ]; then
+        echo "Error: Could not connect to AnkiConnect. Is the app running?"
+        return 1
+      fi
+
+      local deck_name=$(echo "$decks" | fzf --prompt="Select Deck: ")
       [ -z "$deck_name" ] && return
-      anki-view-internal "$db" "$deck_name" | less -R
+      
+      anki-view-internal "http://localhost:8765" "$deck_name" | less -R
     }
   '';
 }

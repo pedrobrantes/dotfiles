@@ -1,37 +1,54 @@
-import sqlite3
+import json
 import sys
+import urllib.request
+
+
+def invoke(action, **params):
+    request_data = json.dumps({
+        "action": action,
+        "params": params,
+        "version": 6
+    })
+    try:
+        response = urllib.request.urlopen(
+            urllib.request.Request(
+                "http://localhost:8765",
+                request_data.encode("utf-8")
+            )
+        )
+        return json.load(response)
+    except Exception as e:
+        print(f"Error connecting to AnkiConnect: {e}")
+        sys.exit(1)
 
 
 def view():
     if len(sys.argv) < 3:
         sys.exit(1)
 
-    db_path, deck_name = sys.argv[1:]
+    # Ignoring DB path arg for API mode
+    _, deck_name = sys.argv[1:]
 
-    def collate(a, b):
-        return (a.lower() > b.lower()) - (a.lower() < b.lower())
+    query = f'deck:"{deck_name}"'
+    result = invoke("findNotes", query=query)
+    note_ids = result.get("result", [])
 
-    conn = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
-    conn.create_collation('unicase', collate)
-    cur = conn.cursor()
+    if not note_ids:
+        print(f"No cards found in deck: {deck_name}")
+        return
 
-    # Using a single-line query string to avoid escape issues in the Nix store
-    query = (
-        "SELECT n.flds FROM notes n "
-        "JOIN cards c ON n.id = c.nid "
-        "JOIN decks d ON c.did = d.id "
-        "WHERE d.name = ?"
-    )
+    notes_info = invoke("notesInfo", notes=note_ids)
+    notes = notes_info.get("result", [])
 
-    cur.execute(query, (deck_name,))
+    for note in notes:
+        fields = note.get("fields", {})
+        front = fields.get("Front", {}).get("value", "N/A")
+        back = fields.get("Back", {}).get("value", "N/A")
 
-    for row in cur.fetchall():
-        # Anki fields are separated by 0x1f
-        content = row[0].replace('\x1f', '\n--- BACK ---\n')
-        print(content)
+        print(f"{front}")
+        print("--- BACK ---")
+        print(f"{back}")
         print("-" * 40)
-
-    conn.close()
 
 
 if __name__ == "__main__":

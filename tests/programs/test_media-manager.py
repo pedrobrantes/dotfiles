@@ -6,5 +6,6 @@ def test_media_manager_installed(home_manager_build):
     content = bashrc.read_text()
     assert "mm()" in content
     assert "anki-view()" in content
+    assert "anki-sync()" in content
     assert "archive.org" in content
     assert "--- Saved Media Sources ---" in content

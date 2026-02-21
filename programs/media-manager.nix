@@ -1,7 +1,12 @@
 { pkgs, ... }:
 
 let
-  # List of trusted media sources (add new sites here!)
+  # Read the Python script from the scripts directory
+  ankiSyncPythonContent = builtins.readFile ../scripts/python/anki_sync.py;
+
+  # Create a standalone binary in the Nix Store
+  ankiSyncTool = pkgs.writers.writePython3Bin "anki-sync-internal" { } ankiSyncPythonContent;
+
   mediaSources = {
     archive = "https://archive.org/details/";
     youtube = "https://www.youtube.com/results?search_query=";
@@ -15,29 +20,34 @@ let
     plutotv = "https://pluto.tv/on-demand/";
   };
 
-  # Generate formatted string for the shell helper
   sourceList = builtins.concatStringsSep "\n" (
     map (name: "${name} - ${builtins.getAttr name mediaSources}") (builtins.attrNames mediaSources)
   );
 in
 {
+  home.packages = [ ankiSyncTool ];
+
   programs.bash.initExtra = ''
+    # Anki Sync from Obsidian
+    anki-sync() {
+      local db="/sdcard/AnkiDroid/collection.anki2"
+      local cards_dir="/mnt/sdcard/Sync/Obsidian/My Notes/2-flashcards"
+      if [ ! -f "$db" ]; then echo "Error: Anki DB not found"; return 1; fi
+      echo -e "\033[1;34m--- Syncing Obsidian to Anki ---\033[0m"
+      for file in "$cards_dir"/*.md; do
+        [ -e "$file" ] || continue
+        local deck=$(basename "$file" .md)
+        echo "Processing: $deck"
+        anki-sync-internal "$db" "$deck" "$file"
+      done
+      echo -e "\033[1;32mSync Complete!\033[0m"
+    }
+
     # Anki Database Browser
-    # Usage: anki-view
     anki-view() {
       local db="/sdcard/AnkiDroid/collection.anki2"
-      if [ ! -f "$db" ]; then
-        echo "Error: Anki database not found at $db"
-        return 1
-      fi
-
-      # 1. Select Deck (Listing decks usually doesn't require the collation)
-      local deck_name=$(sqlite3 "$db" "SELECT name FROM decks" | fzf --prompt="Select Anki Deck: ")
+      local deck_name=$(sqlite3 "$db" "SELECT name FROM decks" | fzf --prompt="Select Deck: ")
       [ -z "$deck_name" ] && return
-
-      echo -e "\033[1;34m--- Cards in $deck_name ---\033[0m"
-      
-      # 2. Query using Python to register the 'unicase' collation on the fly
       python3 -c "
 import sqlite3, sys
 conn = sqlite3.connect(f'file:{sys.argv[1]}?mode=ro', uri=True)
@@ -50,10 +60,6 @@ for r in cur.fetchall():
 " "$db" "$deck_name" | less -R
     }
 
-    # Media Source Manager Helper
-    # Usage: 
-    #   mm list - List saved sources
-    #   mm go   - Interactive search using fzf to pick a source
     mm() {
       case "$1" in
         "list")
@@ -62,16 +68,9 @@ for r in cur.fetchall():
           ;; 
         "go")
           local source=$(echo "${sourceList}" | fzf --prompt="Select Source: " | awk '{print $NF}')
-          if [ -n "$source" ]; then
-             echo -e "\033[1;32mURL available:\033[0m $source"
-             # Copying to clipboard if needed (platform dependent)
-             # echo -n "$source" | xclip -selection clipboard 2>/dev/null
-          fi
+          if [ -n "$source" ]; then echo -e "\033[1;32mURL available:\033[0m $source"; fi
           ;; 
-        *)
-          echo "Usage: mm [list|go]"
-          echo "To download found media: b [URL]"
-          ;; 
+        *) echo "Usage: mm [list|go]";;
       esac
     }
   '';

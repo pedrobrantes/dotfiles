@@ -1,12 +1,17 @@
 { pkgs, ... }:
 
 let
-  # Read the Python script from the scripts directory
-  ankiSyncPythonContent = builtins.readFile ../scripts/python/anki_sync.py;
+  # Modular Scripts from the store
+  ankiSyncTool = pkgs.writers.writePython3Bin "anki-sync-internal" { } 
+    (builtins.readFile ../scripts/python/anki_sync.py);
 
-  # Create a standalone binary in the Nix Store
-  ankiSyncTool = pkgs.writers.writePython3Bin "anki-sync-internal" { } ankiSyncPythonContent;
+  ankiViewTool = pkgs.writers.writePython3Bin "anki-view-internal" { } 
+    (builtins.readFile ../scripts/python/anki_view.py);
 
+  mmTool = pkgs.writeShellScriptBin "mm-internal" 
+    (builtins.readFile ../scripts/bash/mm.sh);
+
+  # Configuration Data
   mediaSources = {
     archive = "https://archive.org/details/";
     youtube = "https://www.youtube.com/results?search_query=";
@@ -25,10 +30,10 @@ let
   );
 in
 {
-  home.packages = [ ankiSyncTool ];
+  home.packages = [ ankiSyncTool ankiViewTool mmTool ];
 
   programs.bash.initExtra = ''
-    # Anki Sync from Obsidian
+    # --- Anki study tools ---
     anki-sync() {
       local db="/sdcard/AnkiDroid/collection.anki2"
       local cards_dir="/mnt/sdcard/Sync/Obsidian/My Notes/2-flashcards"
@@ -43,35 +48,17 @@ in
       echo -e "\033[1;32mSync Complete!\033[0m"
     }
 
-    # Anki Database Browser
     anki-view() {
       local db="/sdcard/AnkiDroid/collection.anki2"
+      if [ ! -f "$db" ]; then echo "Error: Anki DB not found"; return 1; fi
       local deck_name=$(sqlite3 "$db" "SELECT name FROM decks" | fzf --prompt="Select Deck: ")
       [ -z "$deck_name" ] && return
-      python3 -c "
-import sqlite3, sys
-conn = sqlite3.connect(f'file:{sys.argv[1]}?mode=ro', uri=True)
-conn.create_collation('unicase', lambda a, b: (a.lower() > b.lower()) - (a.lower() < b.lower()))
-cur = conn.cursor()
-query = 'SELECT n.flds FROM notes n JOIN cards c ON n.id = c.nid JOIN decks d ON c.did = d.id WHERE d.name = ?'
-cur.execute(query, (sys.argv[2],))
-for r in cur.fetchall():
-    print(r[0].replace('\x1f', '\n--- BACK ---\n') + '\n' + '-'*40)
-" "$db" "$deck_name" | less -R
+      anki-view-internal "$db" "$deck_name" | less -R
     }
 
+    # --- Media Manager ---
     mm() {
-      case "$1" in
-        "list")
-          echo -e "\033[1;34m--- Saved Media Sources ---\033[0m"
-          echo "${sourceList}" | column -t -s "-"
-          ;; 
-        "go")
-          local source=$(echo "${sourceList}" | fzf --prompt="Select Source: " | awk '{print $NF}')
-          if [ -n "$source" ]; then echo -e "\033[1;32mURL available:\033[0m $source"; fi
-          ;; 
-        *) echo "Usage: mm [list|go]";;
-      esac
+      mm-internal "${sourceList}" "$1"
     }
   '';
 }

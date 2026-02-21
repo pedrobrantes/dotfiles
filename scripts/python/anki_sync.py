@@ -15,18 +15,21 @@ def sync():
     conn.create_collation('unicase', collate)
     cur = conn.cursor()
 
+    # 1. Ensure Deck exists with correct schema
     cur.execute('SELECT id FROM decks WHERE name = ?', (deck_name,))
     row = cur.fetchone()
     if row:
         deck_id = row[0]
     else:
         deck_id = int(time.time() * 1000)
+        # Using empty blobs for common and kind as per schema
         cur.execute(
-            'INSERT INTO decks (id, name, mtime, usn, conf, rev) '
-            'VALUES (?, ?, ?, -1, 1, 0)',
-            (deck_id, deck_name, int(time.time()))
+            'INSERT INTO decks (id, name, mtime_secs, usn, common, kind) '
+            'VALUES (?, ?, ?, -1, ?, ?)',
+            (deck_id, deck_name, int(time.time()), b'', b'')
         )
 
+    # 2. Parse Markdown file
     with open(file_path, 'r') as f:
         content = f.read().split('---')
 

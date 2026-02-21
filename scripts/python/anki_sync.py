@@ -22,6 +22,7 @@ def sync():
         deck_id = row[0]
     else:
         deck_id = int(time.time() * 1000)
+        # Using empty blobs for common and kind as per schema
         cur.execute(
             'INSERT INTO decks (id, name, mtime_secs, usn, common, kind) '
             'VALUES (?, ?, ?, -1, ?, ?)',

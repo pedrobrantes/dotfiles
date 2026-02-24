@@ -1,7 +1,7 @@
-{ pkgs, ... }:
+{ pkgsUnstable, ... }:
 
 {
   home.packages = [
-    pkgs.ollama
+    pkgsUnstable.ollama
   ];
 }

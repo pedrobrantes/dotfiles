@@ -33,6 +33,7 @@
       please = "sudo";
       nf = "fastfetch";
       neofetch = "fastfetch";
+      csync = "cheat-sync";
     };
 
     profileExtra = ''
@@ -85,6 +86,31 @@
       fi
 
       echo 'Hi, Brantes! '
+
+      # --- Cheat-sync: Automate Git for personal cheatsheets ---
+      cheat-sync() {
+          local cheats_dir="$HOME/.config/cheat/cheatsheets/personal"
+          if [ ! -d "$cheats_dir/.git" ]; then
+              echo "Error: Personal cheatsheets directory is not a git repository."
+              return 1
+          fi
+          
+          pushd "$cheats_dir" > /dev/null
+          git add .
+          local msg="update cheats: $(date +'%Y-%m-%d %H:%M:%S')"
+          git commit -m "$msg" && git push
+          popd > /dev/null
+      }
+
+      # --- Cheat wrapper: Support 'cheat nix flake' by converting spaces to hyphens ---
+      cheat() {
+          if [ "$#" -gt 1 ]; then
+              local joined=$(IFS=-; echo "$*")
+              command cheat "$joined"
+          else
+              command cheat "$@"
+          fi
+      }
     '';
   };
 

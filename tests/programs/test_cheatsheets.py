@@ -14,9 +14,20 @@ def test_cheatsheets_installed(home_manager_build):
     assert res_tldr.returncode == 0
     assert "tealdeer" in res_tldr.stdout
 
-    # Verify cheat
-    cmd_cheat = [str(cheat_path), "--version"]
-    res_cheat = subprocess.run(cmd_cheat, capture_output=True, text=True)
-    assert res_cheat.returncode == 0
-    assert len(res_cheat.stdout.strip()) > 0
-    assert res_cheat.stdout.strip()[0].isdigit()
+def test_cheat_config_generated(home_manager_build):
+    """Verifies that the cheat config file is generated correctly."""
+    config_file = home_manager_build / "home-files/.config/cheat/conf.yml"
+    assert config_file.exists()
+    
+    content = config_file.read_text()
+    assert "name: personal" in content
+    assert "tags: [ personal ]" in content
+
+def test_cheat_sync_alias(home_manager_build):
+    """Verifies that the cheat-sync function is present in bashrc."""
+    bashrc = home_manager_build / "home-files/.bashrc"
+    content = bashrc.read_text()
+    assert "cheat-sync()" in content
+    # Checking for alias with flexible quoting
+    assert "alias csync=" in content
+    assert "cheat-sync" in content

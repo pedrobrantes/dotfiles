@@ -14,5 +14,6 @@
   imports = [
     sops-nix.homeManagerModules.sops
     ./programs
+    ./directories
   ];
 }

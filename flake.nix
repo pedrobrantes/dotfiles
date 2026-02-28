@@ -16,8 +16,6 @@
       url = "github:Bash-it/bash-it";
       flake = false;
     };
-
-    nixpkgs-pr-489276.url = "github:nixos/nixpkgs/pull/489276/head";
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-master, home-manager, sops-nix, bash-it, ... }@inputs:

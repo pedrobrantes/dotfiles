@@ -36,13 +36,13 @@ fi
 
 info "Applying target: .#${target}"
 
-home-manager switch --flake ".#${target}"
+home-manager switch --flake ".#${target}" -b backup
 
 if [[ "$os" == "android" ]]; then
     if [ -d "/homeless-shelter" ]; then
         warn "Cleaning up /homeless-shelter..."
         rm -rf /homeless-shelter
-	home-manager switch --flake ".#${target}"
+	home-manager switch --flake ".#${target}" -b backup
     fi
     export HOME="/home/brantes"
 fi

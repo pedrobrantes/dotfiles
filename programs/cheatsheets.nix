@@ -28,18 +28,20 @@
   home.activation.cloneCheatsheets = lib.hm.dag.entryAfter ["writeBoundary"] ''
     CHEATS_DIR="${config.home.homeDirectory}/.config/cheat/cheatsheets/personal"
     GIT="${pkgs.git}/bin/git"
+    REPO_URL="https://github.com/pedrobrantes/cheatsheets.git"
     
     if [ ! -d "$CHEATS_DIR/.git" ]; then
       if [ -d "$CHEATS_DIR" ] && [ "$(ls -A $CHEATS_DIR)" ]; then
-        echo "Cheatsheets directory exists and is not empty. Converting to git repository..."
+        echo "Cheatsheets directory exists and is not empty. Converting to git repository (Declarative Fix)..."
         cd "$CHEATS_DIR"
-        $DRY_RUN_CMD $GIT init
-        $DRY_RUN_CMD $GIT remote add origin https://github.com/pedrobrantes/cheatsheets.git
+        $DRY_RUN_CMD $GIT init -b main
+        $DRY_RUN_CMD $GIT remote add origin "$REPO_URL" || $DRY_RUN_CMD $GIT remote set-url origin "$REPO_URL"
         $DRY_RUN_CMD $GIT fetch origin
-        $DRY_RUN_CMD $GIT reset --mixed origin/main
+        $DRY_RUN_CMD $GIT checkout -B main
+        $DRY_RUN_CMD $GIT branch --set-upstream-to=origin/main main || true
       else
         echo "Cloning cheatsheets repository..."
-        $DRY_RUN_CMD $GIT clone https://github.com/pedrobrantes/cheatsheets.git "$CHEATS_DIR"
+        $DRY_RUN_CMD $GIT clone "$REPO_URL" "$CHEATS_DIR"
       fi
     fi
   '';

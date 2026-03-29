@@ -67,5 +67,6 @@
       hosts = "$WIN_PROGRAM_FILES/PowerToys/WinUI3Apps/PowerToys.Hosts.exe";
   };
 
+  programs.custom-tailscale.enableService = true;
   programs.docker-cli.enable = true;
 }

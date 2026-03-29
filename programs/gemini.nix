@@ -64,6 +64,14 @@
       gemini = {
         httpUrl = "https://gemini.run.tools";
       };
+      anki = {
+        command = "npx";
+        args = [ "-y" "@michaelfromin/anki-mcp" ];
+      };
+      obsidian = {
+        command = "npx";
+        args = [ "-y" "obsidian-mcp" "--path" "${config.home.homeDirectory}/Sync/Obsidian/My Notes" ];
+      };
       paper-search = {
         httpUrl = "https://paper-search-mcp-openai--adamamer20.run.tools";
       };

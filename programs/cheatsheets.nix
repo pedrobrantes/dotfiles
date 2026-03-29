@@ -54,6 +54,8 @@
       $GIT remote set-url origin "$REPO_URL"
       $GIT fetch origin -q
       $GIT branch --set-upstream-to=origin/main main || true
+      echo "Restoring missing files from GitHub..."
+      $GIT reset --hard origin/main
     fi
   '';
 }

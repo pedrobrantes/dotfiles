@@ -27,9 +27,20 @@
   # Activation script to ensure the personal cheatsheet repo is cloned if missing
   home.activation.cloneCheatsheets = lib.hm.dag.entryAfter ["writeBoundary"] ''
     CHEATS_DIR="${config.home.homeDirectory}/.config/cheat/cheatsheets/personal"
+    GIT="${pkgs.git}/bin/git"
+    
     if [ ! -d "$CHEATS_DIR/.git" ]; then
-      echo "Cloning cheatsheets repository..."
-      $DRY_RUN_CMD ${pkgs.git}/bin/git clone git@github.com:pedrobrantes/cheatsheets.git "$CHEATS_DIR" || true
+      if [ -d "$CHEATS_DIR" ] && [ "$(ls -A $CHEATS_DIR)" ]; then
+        echo "Cheatsheets directory exists and is not empty. Converting to git repository..."
+        cd "$CHEATS_DIR"
+        $DRY_RUN_CMD $GIT init
+        $DRY_RUN_CMD $GIT remote add origin https://github.com/pedrobrantes/cheatsheets.git
+        $DRY_RUN_CMD $GIT fetch origin
+        $DRY_RUN_CMD $GIT reset --mixed origin/main
+      else
+        echo "Cloning cheatsheets repository..."
+        $DRY_RUN_CMD $GIT clone https://github.com/pedrobrantes/cheatsheets.git "$CHEATS_DIR"
+      fi
     fi
   '';
 }

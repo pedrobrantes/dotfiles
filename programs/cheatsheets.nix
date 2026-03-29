@@ -32,17 +32,28 @@
     
     if [ ! -d "$CHEATS_DIR/.git" ]; then
       if [ -d "$CHEATS_DIR" ] && [ "$(ls -A $CHEATS_DIR)" ]; then
-        echo "Cheatsheets directory exists and is not empty. Converting to git repository (Declarative Fix)..."
+        echo "Cheatsheets directory exists and is not empty. Converting to git repository..."
         cd "$CHEATS_DIR"
-        $DRY_RUN_CMD $GIT init -b main
-        $DRY_RUN_CMD $GIT remote add origin "$REPO_URL" || $DRY_RUN_CMD $GIT remote set-url origin "$REPO_URL"
-        $DRY_RUN_CMD $GIT fetch origin
-        $DRY_RUN_CMD $GIT checkout -B main
-        $DRY_RUN_CMD $GIT branch --set-upstream-to=origin/main main || true
+        $GIT init -b main
+        $GIT remote add origin "$REPO_URL" || $GIT remote set-url origin "$REPO_URL"
+        $GIT fetch origin
+        $GIT checkout -B main
+        $GIT branch --set-upstream-to=origin/main main
       else
         echo "Cloning cheatsheets repository..."
-        $DRY_RUN_CMD $GIT clone "$REPO_URL" "$CHEATS_DIR"
+        $GIT clone "$REPO_URL" "$CHEATS_DIR"
       fi
+    else
+      # If .git exists, ensure branch is main and upstream is set
+      cd "$CHEATS_DIR"
+      CURRENT_BRANCH=$($GIT rev-parse --abbrev-ref HEAD)
+      if [ "$CURRENT_BRANCH" = "master" ]; then
+        echo "Fixing branch name: master -> main"
+        $GIT branch -m master main
+      fi
+      $GIT remote set-url origin "$REPO_URL"
+      $GIT fetch origin -q
+      $GIT branch --set-upstream-to=origin/main main || true
     fi
   '';
 }

@@ -50,17 +50,21 @@ For secrets used by common programs, modify the specific program module (e.g., p
 }
 ```
 
-### B. Machine-Specific Secrets
+### C. Managed Files (SOPS Templates)
 
-For infrastructure secrets, modify the machine definition (e.g., machines/x86_64/wsl/desktop/default.nix).
+For files that need to be generated using secret values (like `authorized_keys` with public keys), use `sops.templates`.
 
 ```nix
 { config, ... }:
 
 {
-  sops.secrets."infrastructure/specific_key" = {
-    sopsFile = ../../../../secrets/secrets.yaml;
-    path = "${config.home.homeDirectory}/.config/service/key.pem";
+  sops.secrets."ssh_public_keys/smartphone" = { };
+
+  sops.templates."authorized_keys" = {
+    content = ''
+      ${config.sops.placeholder."ssh_public_keys/smartphone"}
+    '';
+    path = "${config.home.homeDirectory}/.ssh/authorized_keys";
   };
 }
 ```

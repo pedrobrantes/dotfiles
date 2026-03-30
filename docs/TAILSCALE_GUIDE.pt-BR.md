@@ -36,6 +36,13 @@ Este guia documenta a configuração e o fluxo de trabalho do **Tailscale** gere
     ```
     *A função buscará automaticamente a chave no Bitwarden.*
 
+## 3. Controle de Acesso SSH (Declarativo)
+
+O acesso SSH entre os nós é gerenciado de forma declarativa via templates do SOPS. Para autorizar um novo dispositivo (como seu smartphone):
+
+1.  Adicione a chave pública no `secrets/secrets.yaml` sob `ssh_public_keys/`.
+2.  O arquivo `authorized_keys` é gerado e gerenciado automaticamente pela configuração Nix na máquina desktop.
+
 ---
 
 ## 3. Fluxo de Trabalho no Android

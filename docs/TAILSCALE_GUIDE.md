@@ -36,6 +36,13 @@ This guide documents the configuration and workflow for **Tailscale** managed by
     ```
     *The function will automatically fetch the key from Bitwarden.*
 
+## 3. SSH Access Control (Declarative)
+
+The SSH access between nodes is managed declaratively via SOPS templates. To authorize a new device (like your smartphone):
+
+1.  Add the public key to `secrets/secrets.yaml` under `ssh_public_keys/`.
+2.  The `authorized_keys` file is automatically generated and managed by the Nix configuration on the desktop machine.
+
 ---
 
 ## 3. Workflow on Android

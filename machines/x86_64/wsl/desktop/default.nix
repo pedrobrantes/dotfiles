@@ -69,4 +69,19 @@
 
   programs.custom-tailscale.enableService = true;
   programs.docker-cli.enable = true;
+
+  sops.secrets."ssh_public_keys/smartphone" = { };
+
+  home.activation.authorizeSmartphone = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    PUB_KEY_PATH="${config.sops.secrets."ssh_public_keys/smartphone".path}"
+    AUTH_FILE="${config.home.homeDirectory}/.ssh/authorized_keys"
+
+    mkdir -p "$(dirname "$AUTH_FILE")"
+    if [ -f "$PUB_KEY_PATH" ]; then
+      KEY=$(cat "$PUB_KEY_PATH")
+      if ! grep -q "$KEY" "$AUTH_FILE" 2>/dev/null; then
+        echo "$KEY" >> "$AUTH_FILE"
+      fi
+    fi
+  '';
 }

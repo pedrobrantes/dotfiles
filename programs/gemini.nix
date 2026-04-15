@@ -34,14 +34,41 @@
       instagram = {
         httpUrl = "https://instagram.run.tools";
       };
+      linkedin = {
+        httpUrl = "https://linkedin.run.tools";
+      };
       facebook = {
         httpUrl = "https://facebook.run.tools";
       };
       discord = {
         httpUrl = "https://discord.run.tools";
       };
+      discourse = {
+        httpUrl = "https://discourse-forum-mcp--king-of-the-grackles.run.tools";
+      };
+      eventbrite = {
+        httpUrl = "https://eventbrite.run.tools";
+      };
       gmail = {
         httpUrl = "https://gmail.run.tools";
+      };
+      google-calendar = {
+        httpUrl = "https://googlecalendar.run.tools";
+      };
+      google-maps = {
+        httpUrl = "https://google_maps.run.tools";
+      };
+      notion = {
+        httpUrl = "https://notion.run.tools";
+      };
+      math = {
+        httpUrl = "https://math-mcp--ethanhenrickson.run.tools";
+      };
+      audioscrape = {
+        httpUrl = "https://audioscrape.run.tools";
+      };
+      rss-reader = {
+        httpUrl = "https://rss-reader-mcp--kwp-lab.run.tools";
       };
       twitter = {
         httpUrl = "https://twitter.run.tools";
@@ -57,6 +84,9 @@
       };
       exa = {
         httpUrl = "https://exa.run.tools";
+      };
+      opengraph = {
+        httpUrl = "https://opengraph--opengraph.run.tools";
       };
       youtube = {
         httpUrl = "https://youtube.run.tools";

@@ -15,3 +15,13 @@ def test_gemini_configs_generated(home_manager_build):
     settings_data = json.loads(settings.read_text())
     assert settings_data["security"]["auth"]["selectedType"] == "oauth-personal"
     assert "github" in settings_data["mcpServers"]
+    assert "discourse" in settings_data["mcpServers"]
+    assert "google-calendar" in settings_data["mcpServers"]
+    assert "notion" in settings_data["mcpServers"]
+    assert "math" in settings_data["mcpServers"]
+    assert "audioscrape" in settings_data["mcpServers"]
+    assert "rss-reader" in settings_data["mcpServers"]
+    assert "linkedin" in settings_data["mcpServers"]
+    assert "google-maps" in settings_data["mcpServers"]
+    assert "eventbrite" in settings_data["mcpServers"]
+    assert "opengraph" in settings_data["mcpServers"]

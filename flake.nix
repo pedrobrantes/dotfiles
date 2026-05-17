@@ -61,6 +61,11 @@
           system = "aarch64-linux"; 
           configPath = ./machines/aarch64/android/smartphone/default.nix; 
         };
+
+	"brantes@aarch64.android.tablet" = mkHome {
+          system = "aarch64-linux";
+          configPath = ./machines/aarch64/android/tablet/default.nix;
+        };
       };
     };
 }

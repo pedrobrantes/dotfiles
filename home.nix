@@ -7,7 +7,7 @@
   # Env
   home.sessionVariables = {
     EDITOR = "nvim";
-    GEMINI_API_KEY = config.sops.secrets.gemini_api_key.path;
+    ANTIGRAVITY_API_KEY = config.sops.secrets.gemini_api_key.path;
   };
 
   # Programs modules

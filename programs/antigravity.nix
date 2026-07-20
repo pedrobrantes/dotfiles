@@ -2,11 +2,11 @@
 
 {
   home.packages = [
-    pkgsUnstable.gemini-cli
+    pkgsUnstable.antigravity-cli
   ];
 
-  # Gemini-cli configurations in ~/.gemini/
-  home.file.".gemini/settings.json".text = builtins.toJSON {
+  # Antigravity-cli configurations in ~/.gemini/antigravity-cli/
+  home.file.".gemini/antigravity-cli/settings.json".text = builtins.toJSON {
     security = {
       auth = {
         selectedType = "oauth-personal";
@@ -15,6 +15,10 @@
     general = {
       previewFeatures = true;
     };
+    trustedWorkspaces = [
+      "${config.home.homeDirectory}/.config/home-manager"
+      config.home.homeDirectory
+    ];
     mcpServers = {
       fetch = {
         httpUrl = "https://server.smithery.ai/smithery-ai/fetch/mcp";
@@ -112,15 +116,5 @@
         httpUrl = "https://linkup-mcp-server--linkupplatform.run.tools";
       };
     };
-  };
-
-  home.file.".gemini/projects.json".text = builtins.toJSON {
-    projects = {
-      "${config.home.homeDirectory}" = "brantes";
-    };
-  };
-
-  home.file.".gemini/trustedFolders.json".text = builtins.toJSON {
-    "${config.home.homeDirectory}" = "TRUST_FOLDER";
   };
 }

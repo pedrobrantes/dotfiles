@@ -27,22 +27,22 @@ in
   programs.zsh.initExtra = ''
     export PROMPT="%F{yellow}%n%f@%F{green}${hostName}%f:%F{blue}%~%f%# "
     if ! pgrep -x "sshd" > /dev/null; then
-      SSHD_BIN="/data/data/com.termux/files/usr/bin/sshd"
-      if [ ! -x "$SSHD_BIN" ]; then
-        SSHD_BIN="${pkgs.openssh}/bin/sshd"
+      if command -v proot > /dev/null 2>&1; then
+        proot -0 ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config
+      else
+        ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config
       fi
-      "$SSHD_BIN" -f ${config.home.homeDirectory}/.ssh/sshd_config
     fi
   '';
 
   programs.bash.initExtra = ''
     export PS1="\[\033[01;33m\]\u\[\033[00m\]@\[\033[01;32m\]${hostName}\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
     if ! pgrep -x "sshd" > /dev/null; then
-      SSHD_BIN="/data/data/com.termux/files/usr/bin/sshd"
-      if [ ! -x "$SSHD_BIN" ]; then
-        SSHD_BIN="${pkgs.openssh}/bin/sshd"
+      if command -v proot > /dev/null 2>&1; then
+        proot -0 ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config
+      else
+        ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config
       fi
-      "$SSHD_BIN" -f ${config.home.homeDirectory}/.ssh/sshd_config
     fi
   '';
 }

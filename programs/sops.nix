@@ -24,20 +24,18 @@ in
     };
   };
 
-  home.activation.sopsAndroidSecrets = lib.mkIf pkgs.stdenv.hostPlatform.isAndroid (
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      if [ -f "${cfg.age.keyFile}" ]; then
-        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: secret: ''
-          if [ -n "${secret.path or ""}" ]; then
-            mkdir -p "$(dirname "${secret.path}")"
-            $DRY_RUN_CMD ${pkgs.sops}/bin/sops --decrypt \
-              --age-key-file "${cfg.age.keyFile}" \
-              --extract '["${lib.replaceStrings ["/"] ["\"][\""] name}"]' \
-              ${secret.sopsFile} > "${secret.path}" 2>/dev/null || true
-            chmod ${secret.mode or "0600"} "${secret.path}"
-          fi
-        '') (lib.filterAttrs (_: s: s.path != null && s.path != "") cfg.secrets))}
-      fi
-    ''
-  );
+  home.activation.sopsFallbackSecrets = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ -f "${cfg.age.keyFile}" ]; then
+      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: secret: ''
+        if [ -n "${secret.path or ""}" ] && [ ! -e "${secret.path}" ]; then
+          mkdir -p "$(dirname "${secret.path}")"
+          $DRY_RUN_CMD ${pkgs.sops}/bin/sops --decrypt \
+            --age-key-file "${cfg.age.keyFile}" \
+            --extract '["${lib.replaceStrings ["/"] ["\"][\""] name}"]' \
+            ${secret.sopsFile} > "${secret.path}" 2>/dev/null || true
+          chmod ${secret.mode or "0600"} "${secret.path}"
+        fi
+      '') (lib.filterAttrs (_: s: s.path != null && s.path != "") cfg.secrets))}
+    fi
+  '';
 }

@@ -10,7 +10,6 @@
       PermitEmptyPasswords no
       ChallengeResponseAuthentication no
       PrintMotd no
-      PrintLastLog no
       AcceptEnv LANG LC_*
       SetEnv PATH=${config.home.homeDirectory}/.nix-profile/bin:/data/data/com.termux/files/usr/bin:/bin:/usr/bin
     '';

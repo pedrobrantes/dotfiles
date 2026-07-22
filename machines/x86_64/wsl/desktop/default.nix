@@ -71,11 +71,13 @@
   programs.docker-cli.enable = true;
   programs.custom-ollama.enable = true;
 
+  sops.secrets."ssh_public_keys/desktop" = { };
   sops.secrets."ssh_public_keys/smartphone" = { };
   sops.secrets."ssh_public_keys/tablet" = { };
 
   sops.templates."authorized_keys" = {
     content = ''
+      ${config.sops.placeholder."ssh_public_keys/desktop"}
       ${config.sops.placeholder."ssh_public_keys/smartphone"}
       ${config.sops.placeholder."ssh_public_keys/tablet"}
     '';

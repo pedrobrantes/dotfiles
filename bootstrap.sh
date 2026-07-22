@@ -79,7 +79,7 @@ detect_target() {
     local device="desktop"
     local system_target=""
 
-    if [[ -n "${TERMUX_VERSION:-}" ]]; then
+    if [ -d "/data/data/com.termux" ] || [ -f "/system/build.prop" ] || [ -n "${TERMUX_VERSION:-}" ]; then
         os="android"
         device="smartphone"
     elif grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null; then
@@ -88,7 +88,6 @@ detect_target() {
     fi
 
     system_target="${USERNAME}@${arch}.${os}.${device}"
-
     echo "$system_target"
 }
 
@@ -108,7 +107,6 @@ main() {
     info "Sops key file not found. Starting Bitwarden workflow."
     warn "You will be prompted for your Bitwarden credentials."
     
-    # Using 'nix shell' to fetch bitwarden-cli temporarily
     nix-shell -p bitwarden-cli --run "
       set -euo pipefail
       if ! bw status | grep -q '\"status\":\"unlocked\"'; then
@@ -149,9 +147,9 @@ main() {
       echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
   fi
 
-  if [[ "$os" == "android" ]]; then
+  if [[ "$flake_target" =~ "android" ]]; then
     info "Running Android-specific environment fixes..."
-    [ -d "/homeless-shelter" ] && sudo rm -rf /homeless-shelter && rm -rf /homeless-shelter/
+    [ -d "/homeless-shelter" ] && rm -rf /homeless-shelter /homeless-shelter/ 2>/dev/null || true
     export HOME="/home/${USERNAME}"
   fi
 

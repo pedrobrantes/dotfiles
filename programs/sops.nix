@@ -1,5 +1,8 @@
 { config, pkgs, lib, ... }:
 
+let
+  cfg = config.sops;
+in
 {
   home.packages = [ pkgs.sops ];
 
@@ -13,18 +16,28 @@
 
     defaultSopsFile = ../secrets/secrets.yaml;
 
-    # Every input is avaiable in 'config.sops.secrets.<nome>'.
     secrets = {
       "gemini_api_key" = {
         sopsFile = ../secrets/api_keys.yaml;
-	key = "";
+        key = "";
       };
-
-      # Add new secret on the future
-      # "my_api_token" = {
-      #   sopsFile = ../secrets/secrets.yaml;
-      #   key = "apis_tokens.my_service2";
-      # };
     };
   };
+
+  home.activation.sopsAndroidSecrets = lib.mkIf pkgs.stdenv.hostPlatform.isAndroid (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      if [ -f "${cfg.age.keyFile}" ]; then
+        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: secret: ''
+          if [ -n "${secret.path or ""}" ]; then
+            mkdir -p "$(dirname "${secret.path}")"
+            $DRY_RUN_CMD ${pkgs.sops}/bin/sops --decrypt \
+              --age-key-file "${cfg.age.keyFile}" \
+              --extract '["${lib.replaceStrings ["/"] ["\"][\""] name}"]' \
+              ${secret.sopsFile} > "${secret.path}" 2>/dev/null || true
+            chmod ${secret.mode or "0600"} "${secret.path}"
+          fi
+        '') (lib.filterAttrs (_: s: s.path != null && s.path != "") cfg.secrets))}
+      fi
+    ''
+  );
 }

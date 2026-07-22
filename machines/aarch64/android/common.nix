@@ -27,7 +27,11 @@
     text = ''
       #!/bin/sh
       if ! pgrep -x "sshd" > /dev/null; then
-        ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config
+        SSHD_BIN="/data/data/com.termux/files/usr/bin/sshd"
+        if [ ! -x "$SSHD_BIN" ]; then
+          SSHD_BIN="${pkgs.openssh}/bin/sshd"
+        fi
+        "$SSHD_BIN" -f ${config.home.homeDirectory}/.ssh/sshd_config
       fi
     '';
     executable = true;

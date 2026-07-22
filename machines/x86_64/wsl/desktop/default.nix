@@ -69,6 +69,7 @@
 
   programs.custom-tailscale.enableService = true;
   programs.docker-cli.enable = true;
+  programs.custom-ollama.enable = true;
 
   sops.secrets."ssh_public_keys/smartphone" = { };
   sops.secrets."ssh_public_keys/tablet" = { };

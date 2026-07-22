@@ -28,4 +28,5 @@
   '';
 
   programs.docker-cli.enable = true;
+  programs.custom-ollama.enable = true;
 }

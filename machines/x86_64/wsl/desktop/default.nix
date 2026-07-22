@@ -71,11 +71,14 @@
   programs.docker-cli.enable = true;
 
   sops.secrets."ssh_public_keys/smartphone" = { };
+  sops.secrets."ssh_public_keys/tablet" = { };
 
   sops.templates."authorized_keys" = {
     content = ''
       ${config.sops.placeholder."ssh_public_keys/smartphone"}
+      ${config.sops.placeholder."ssh_public_keys/tablet"}
     '';
     path = "${config.home.homeDirectory}/.ssh/authorized_keys";
+    mode = "0600";
   };
 }

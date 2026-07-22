@@ -29,8 +29,7 @@ in
       ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: secret: ''
         if [ -n "${secret.path or ""}" ] && [ ! -e "${secret.path}" ]; then
           mkdir -p "$(dirname "${secret.path}")"
-          $DRY_RUN_CMD ${pkgs.sops}/bin/sops --decrypt \
-            --age-key-file "${cfg.age.keyFile}" \
+          SOPS_AGE_KEY_FILE="${cfg.age.keyFile}" $DRY_RUN_CMD ${pkgs.sops}/bin/sops --decrypt \
             --extract '["${lib.replaceStrings ["/"] ["\"][\""] name}"]' \
             ${secret.sopsFile} > "${secret.path}" 2>/dev/null || true
           chmod ${secret.mode or "0600"} "${secret.path}"

@@ -2,6 +2,6 @@
 
 {
   home.packages = [
-    pkgs.uutils-coreutils-noprefix
+    pkgs.coreutils
   ];
 }

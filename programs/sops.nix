@@ -1,12 +1,15 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   home.packages = [ pkgs.sops ];
 
   sops = {
     age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
-
     age.sshKeyPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
+
+    defaultSecretsMountPoint = if pkgs.stdenv.hostPlatform.isAndroid
+      then "${config.home.homeDirectory}/.config/sops-nix/secrets.d"
+      else "/run/user/1000/secrets.d";
 
     defaultSopsFile = ../secrets/secrets.yaml;
 

@@ -4,7 +4,7 @@
   home.file.".ssh/sshd_config" = {
     text = ''
       Port 8022
-      HostKey ${config.home.homeDirectory}/.ssh/id_ed25519
+      HostKey ${config.home.homeDirectory}/.ssh/sshd_host_ed25519_key
       AuthorizedKeysFile .ssh/authorized_keys
       PasswordAuthentication yes
       PermitEmptyPasswords no
@@ -13,6 +13,13 @@
       AcceptEnv LANG LC_*
     '';
   };
+
+  home.activation.generateSshdHostKey = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    HOST_KEY="${config.home.homeDirectory}/.ssh/sshd_host_ed25519_key"
+    if [ ! -f "$HOST_KEY" ]; then
+      ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -f "$HOST_KEY" -N ""
+    fi
+  '';
 
   home.file.".termux/boot/start-sshd.sh" = {
     text = ''

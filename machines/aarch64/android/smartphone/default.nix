@@ -28,7 +28,7 @@ in
     export PROMPT="%F{yellow}%n%f@%F{green}${hostName}%f:%F{blue}%~%f%# "
     if ! pgrep -x "sshd" > /dev/null; then
       if command -v proot > /dev/null 2>&1; then
-        nohup proot -0 ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config > /dev/null 2>&1 &
+        PROOT_NO_SECCOMP=1 nohup proot -0 ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config > /dev/null 2>&1 &
       else
         nohup ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config > /dev/null 2>&1 &
       fi
@@ -39,7 +39,7 @@ in
     export PS1="\[\033[01;33m\]\u\[\033[00m\]@\[\033[01;32m\]${hostName}\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
     if ! pgrep -x "sshd" > /dev/null; then
       if command -v proot > /dev/null 2>&1; then
-        nohup proot -0 ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config > /dev/null 2>&1 &
+        PROOT_NO_SECCOMP=1 nohup proot -0 ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config > /dev/null 2>&1 &
       else
         nohup ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config > /dev/null 2>&1 &
       fi

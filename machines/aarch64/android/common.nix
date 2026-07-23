@@ -20,6 +20,7 @@
     if [ ! -f "$HOST_KEY" ]; then
       ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -f "$HOST_KEY" -N ""
     fi
+    $DRY_RUN_CMD mkdir -p /var/empty
   '';
 
   home.file.".termux/boot/start-sshd.sh" = {

@@ -11,6 +11,7 @@
       ChallengeResponseAuthentication no
       PrintMotd no
       AcceptEnv LANG LC_*
+      SetEnv PATH=${config.home.homeDirectory}/.nix-profile/bin:/data/data/com.termux/files/usr/bin:/bin:/usr/bin
     '';
   };
 

@@ -27,9 +27,9 @@
       #!/bin/sh
       if ! pgrep -x "sshd" > /dev/null; then
         if command -v proot > /dev/null 2>&1; then
-          proot -0 ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config
+          nohup proot -0 ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config > /dev/null 2>&1 &
         else
-          ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config
+          nohup ${pkgs.openssh}/bin/sshd -f ${config.home.homeDirectory}/.ssh/sshd_config > /dev/null 2>&1 &
         fi
       fi
     '';

@@ -10,7 +10,6 @@
       PermitEmptyPasswords no
       ChallengeResponseAuthentication no
       PrintMotd no
-      UsePrivilegeSeparation no
       StrictModes no
       UseDNS no
       AcceptEnv LANG LC_*
@@ -24,6 +23,8 @@
       ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -f "$HOST_KEY" -N ""
     fi
     $DRY_RUN_CMD mkdir -p /var/empty
+    $DRY_RUN_CMD chown root:root /var/empty 2>/dev/null || true
+    $DRY_RUN_CMD chmod 755 /var/empty
   '';
 
   home.file.".termux/boot/start-sshd.sh" = {

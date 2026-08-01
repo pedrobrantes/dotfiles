@@ -6,23 +6,28 @@
   ];
 
   # Antigravity-cli configurations in ~/.gemini/antigravity-cli/
-  home.file.".gemini/antigravity-cli/settings.json".text = builtins.toJSON {
-    security = {
-      auth = {
-        selectedType = "oauth-personal";
+  home.file.".gemini/antigravity-cli/settings.json" = {
+    force = true;
+    text = builtins.toJSON {
+      security = {
+        auth = {
+          selectedType = "oauth-personal";
+        };
       };
+      general = {
+        previewFeatures = true;
+      };
+      trustedWorkspaces = [
+        "${config.home.homeDirectory}/.config/home-manager"
+        config.home.homeDirectory
+      ];
     };
-    general = {
-      previewFeatures = true;
-    };
-    trustedWorkspaces = [
-      "${config.home.homeDirectory}/.config/home-manager"
-      config.home.homeDirectory
-    ];
   };
 
   # Antigravity MCP configuration in ~/.gemini/antigravity-cli/mcp_config.json
-  home.file.".gemini/antigravity-cli/mcp_config.json".text = builtins.toJSON {
+  home.file.".gemini/antigravity-cli/mcp_config.json" = {
+    force = true;
+    text = builtins.toJSON {
     mcpServers = {
       fetch = {
         serverUrl = "https://server.smithery.ai/smithery-ai/fetch/mcp";
@@ -136,7 +141,11 @@
       };
     };
   };
+  };
 
   # Also alias to ~/.gemini/config/mcp_config.json for global Antigravity discovery
-  home.file.".gemini/config/mcp_config.json".text = config.home.file.".gemini/antigravity-cli/mcp_config.json".text;
+  home.file.".gemini/config/mcp_config.json" = {
+    force = true;
+    text = config.home.file.".gemini/antigravity-cli/mcp_config.json".text;
+  };
 }

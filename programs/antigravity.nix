@@ -19,84 +19,88 @@
       "${config.home.homeDirectory}/.config/home-manager"
       config.home.homeDirectory
     ];
+  };
+
+  # Antigravity MCP configuration in ~/.gemini/antigravity-cli/mcp_config.json
+  home.file.".gemini/antigravity-cli/mcp_config.json".text = builtins.toJSON {
     mcpServers = {
       fetch = {
-        httpUrl = "https://server.smithery.ai/smithery-ai/fetch/mcp";
+        serverUrl = "https://server.smithery.ai/smithery-ai/fetch/mcp";
       };
       github = {
-        httpUrl = "https://github.run.tools";
+        serverUrl = "https://github.run.tools";
       };
       context7 = {
-        httpUrl = "https://context7-mcp--upstash.run.tools";
+        serverUrl = "https://context7-mcp--upstash.run.tools";
       };
       grokipedia = {
-        httpUrl = "https://grokipedia-mcp--skymoore.run.tools";
+        serverUrl = "https://grokipedia-mcp--skymoore.run.tools";
       };
       reddit = {
-        httpUrl = "https://reddit.run.tools";
+        serverUrl = "https://reddit.run.tools";
       };
       instagram = {
-        httpUrl = "https://instagram.run.tools";
+        serverUrl = "https://instagram.run.tools";
       };
       linkedin = {
-        httpUrl = "https://linkedin.run.tools";
+        serverUrl = "https://linkedin.run.tools";
       };
       facebook = {
-        httpUrl = "https://facebook.run.tools";
+        serverUrl = "https://facebook.run.tools";
       };
       discord = {
-        httpUrl = "https://discord.run.tools";
+        serverUrl = "https://discord.run.tools";
       };
       discourse = {
-        httpUrl = "https://discourse-forum-mcp--king-of-the-grackles.run.tools";
+        serverUrl = "https://discourse-forum-mcp--king-of-the-grackles.run.tools";
       };
       eventbrite = {
-        httpUrl = "https://eventbrite.run.tools";
+        serverUrl = "https://eventbrite.run.tools";
       };
       gmail = {
-        httpUrl = "https://gmail.run.tools";
+        serverUrl = "https://gmail.run.tools";
       };
       google-calendar = {
-        httpUrl = "https://googlecalendar.run.tools";
+        serverUrl = "https://googlecalendar.run.tools";
       };
       google-maps = {
-        httpUrl = "https://google_maps.run.tools";
+        serverUrl = "https://google_maps.run.tools";
       };
       notion = {
-        httpUrl = "https://notion.run.tools";
+        serverUrl = "https://notion.run.tools";
       };
       math = {
-        httpUrl = "https://math-mcp--ethanhenrickson.run.tools";
+        serverUrl = "https://math-mcp--ethanhenrickson.run.tools";
       };
       audioscrape = {
-        httpUrl = "https://audioscrape.run.tools";
+        serverUrl = "https://audioscrape.run.tools";
       };
       rss-reader = {
-        httpUrl = "https://rss-reader-mcp--kwp-lab.run.tools";
+        serverUrl = "https://rss-reader-mcp--kwp-lab.run.tools";
       };
       twitter = {
-        httpUrl = "https://twitter.run.tools";
+        serverUrl = "https://twitter.run.tools";
       };
       excel = {
-        httpUrl = "https://excel.run.tools";
+        serverUrl = "https://excel.run.tools";
       };
       hackernews = {
-        httpUrl = "https://hackernews.run.tools";
+        serverUrl = "https://hackernews.run.tools";
       };
       excalidraw = {
-        httpUrl = "https://excalidraw.run.tools";
+        serverUrl = "https://excalidraw.run.tools";
       };
       exa = {
-        httpUrl = "https://exa.run.tools";
+        serverUrl = "https://exa.run.tools";
       };
       opengraph = {
-        httpUrl = "https://opengraph--opengraph.run.tools";
+        serverUrl = "https://opengraph--opengraph.run.tools";
       };
       youtube = {
-        httpUrl = "https://youtube.run.tools";
+        serverUrl = "https://youtube.run.tools";
       };
       gemini = {
-        httpUrl = "https://gemini.run.tools";
+        serverUrl = "https://gemini.run.tools";
       };
       anki = {
         command = "npx";
@@ -107,14 +111,32 @@
         args = [ "-y" "obsidian-mcp" "--path" "${config.home.homeDirectory}/Sync/Obsidian/My Notes" ];
       };
       paper-search = {
-        httpUrl = "https://paper-search-mcp-openai--adamamer20.run.tools";
+        serverUrl = "https://paper-search-mcp-openai--adamamer20.run.tools";
       };
       mem0 = {
-        httpUrl = "https://mem0-memory-mcp--mem0ai.run.tools";
+        serverUrl = "https://mem0-memory-mcp--mem0ai.run.tools";
       };
       linkup = {
-        httpUrl = "https://linkup-mcp-server--linkupplatform.run.tools";
+        serverUrl = "https://linkup-mcp-server--linkupplatform.run.tools";
+      };
+      grep = {
+        serverUrl = "https://grep--vercel.run.tools";
+      };
+      huggingface = {
+        serverUrl = "https://huggingface.run.tools";
+      };
+      supabase = {
+        serverUrl = "https://supabase.run.tools";
+      };
+      figma = {
+        serverUrl = "http://127.0.0.1:3845/mcp";
+      };
+      stripe = {
+        serverUrl = "https://stripe.run.tools";
       };
     };
   };
+
+  # Also alias to ~/.gemini/config/mcp_config.json for global Antigravity discovery
+  home.file.".gemini/config/mcp_config.json".text = config.home.file.".gemini/antigravity-cli/mcp_config.json".text;
 }

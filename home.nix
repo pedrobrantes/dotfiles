@@ -10,6 +10,13 @@
     ANTIGRAVITY_API_KEY = config.sops.secrets.gemini_api_key.path;
   };
 
+  sops.package = (pkgs.callPackage sops-nix {
+    pkgs = pkgs.extend (final: prev: {
+      go = prev.go_1_26;
+      buildGoModule = prev.buildGoModule.override { go = prev.go_1_26; };
+    });
+  }).sops-install-secrets;
+
   # Programs modules
   imports = [
     sops-nix.homeManagerModules.sops

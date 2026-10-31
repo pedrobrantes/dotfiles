@@ -12,7 +12,8 @@ def get_flake_target():
         device = "smartphone"
     elif "Microsoft" in os.uname().release or "WSL" in os.uname().release:
         os_name = "wsl"
-        device = "desktop"
+        hostname = subprocess.check_output(["hostname"]).decode().strip()
+        device = "notebook" if "notebook" in hostname.lower() else "desktop"
     else:
         os_name = "linux"
         device = "desktop"

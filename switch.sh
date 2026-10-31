@@ -49,7 +49,15 @@ if [ -d "/data/data/com.termux" ] || [ -f "/system/build.prop" ]; then
     device="smartphone"
 elif grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null; then
     os="wsl"
-    device="desktop"
+    # Permite override explícito via variável de ambiente (ex: HM_DEVICE=notebook ./switch.sh)
+    # Após a primeira aplicação, o hostname já será "x86_64.wsl.notebook" e a detecção é automática.
+    if [ -n "${HM_DEVICE:-}" ]; then
+      device="$HM_DEVICE"
+    elif hostname | grep -qi "notebook"; then
+      device="notebook"
+    else
+      device="desktop"
+    fi
 fi
 
 target="brantes@${arch}.${os}.${device}"

@@ -22,7 +22,11 @@
     let
       mkHome = { system, configPath }:
         let
-          config = { allowUnfree = true; };
+          config = {
+            allowUnfree = true;
+            # docker-28.5.2 is flagged insecure in nixpkgs 25.11; permit explicitly
+            permittedInsecurePackages = [ "docker-28.5.2" ];
+          };
           pkgs = import nixpkgs { inherit system config; };
           pkgsUnstable = import nixpkgs-unstable { inherit system config; };
           pkgsMaster = import nixpkgs-master { inherit system config; };
@@ -65,6 +69,11 @@
 	"brantes@aarch64.android.tablet" = mkHome {
           system = "aarch64-linux";
           configPath = ./machines/aarch64/android/tablet/default.nix;
+        };
+
+        "brantes@x86_64.wsl.notebook" = mkHome {
+          system = "x86_64-linux";
+          configPath = ./machines/x86_64/wsl/notebook/default.nix;
         };
       };
     };

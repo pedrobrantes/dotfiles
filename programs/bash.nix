@@ -72,9 +72,12 @@
       }
 
       export BASH_IT="${inputs.bash-it}"
-      if [ -d "${config.home.homeDirectory}/.bash_it" ]; then
+      if [ -f "$BASH_IT/bash_it.sh" ] || [ -d "${config.home.homeDirectory}/.bash_it" ]; then
         export BASH_IT_THEME='pure'
         source "$BASH_IT/bash_it.sh"
+        if command -v __bp_install > /dev/null 2>&1; then
+          __bp_install
+        fi
       fi
 
       if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then

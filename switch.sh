@@ -72,9 +72,18 @@ if ! nix-shell -p python3Packages.pytest --run "pytest tests/"; then
 fi
 success "All tests passed."
 
+apply_home_manager() {
+    if command -v home-manager > /dev/null 2>&1; then
+        home-manager switch --flake ".#${target}" -b backup
+    else
+        info "home-manager not found in PATH; bootstrapping via nix-shell..."
+        NIX_CONFIG="experimental-features = nix-command flakes" nix-shell -p home-manager --run "home-manager switch --flake '.#${target}' -b backup"
+    fi
+}
+
 info "Applying target: .#${target}"
 
-if ! home-manager switch --flake ".#${target}" -b backup; then
+if ! apply_home_manager; then
     handle_build_error
 fi
 
@@ -82,7 +91,7 @@ if [[ "$os" == "android" ]]; then
     if [ -d "/homeless-shelter" ]; then
         warn "Cleaning up /homeless-shelter..."
         rm -rf /homeless-shelter
-        home-manager switch --flake ".#${target}" -b backup
+        apply_home_manager
     fi
     export HOME="/home/brantes"
 fi

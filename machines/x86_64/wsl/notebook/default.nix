@@ -15,16 +15,6 @@
     mode = "0600";
   };
 
-  home.activation.setHostname = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    DESIRED_HOSTNAME="x86_64.wsl.notebook"
-    CURRENT_HOSTNAME="$(cat /proc/sys/kernel/hostname 2>/dev/null || ${pkgs.hostname}/bin/hostname 2>/dev/null || true)"
-    if [ -n "$CURRENT_HOSTNAME" ] && [ "$CURRENT_HOSTNAME" != "$DESIRED_HOSTNAME" ]; then
-      if command -v sudo > /dev/null 2>&1 && [ -z "''${CI:-}" ]; then
-         $DRY_RUN_CMD sudo ${pkgs.hostname}/bin/hostname "$DESIRED_HOSTNAME" 2>/dev/null || $DRY_RUN_CMD sudo hostname "$DESIRED_HOSTNAME" 2>/dev/null || true
-         $DRY_RUN_CMD sudo sh -c "echo '$DESIRED_HOSTNAME' > /etc/hostname" 2>/dev/null || true
-      fi
-    fi
-  '';
 
   programs.bash.shellAliases = {
     # === WSL / Windows aliases ===

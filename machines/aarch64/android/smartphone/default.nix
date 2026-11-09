@@ -1,8 +1,5 @@
 { config, pkgs, lib, ... }:
 
-let
-  hostName = "aarch64.android.smartphone";
-in
 {
   imports = [
     ../../../../home.nix
@@ -20,15 +17,7 @@ in
     mode = "0600";
   };
 
-  home.sessionVariables = {
-    HOSTNAME = hostName;
-  };
-
   programs.zsh.initExtra = ''
-    export PROMPT="%F{yellow}%n%f@%F{green}${hostName}%f:%F{blue}%~%f%# "
-  '';
-
-  programs.bash.initExtra = ''
-    export PS1="\[\033[01;33m\]\u\[\033[00m\]@\[\033[01;32m\]${hostName}\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
+    export PROMPT="%F{yellow}%n%f@%F{green}${config.custom.hostName}%f:%F{blue}%~%f%# "
   '';
 }

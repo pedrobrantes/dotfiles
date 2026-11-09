@@ -20,7 +20,7 @@
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-master, home-manager, sops-nix, bash-it, ... }@inputs:
     let
-      mkHome = { system, configPath }:
+      mkHome = { system, configPath, hostName }:
         let
           config = {
             allowUnfree = true;
@@ -40,41 +40,32 @@
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = {
-            inherit sops-nix inputs pkgsUnstable pkgsMaster pkgsPr;
+            inherit sops-nix inputs pkgsUnstable pkgsMaster pkgsPr hostName;
           };
           modules = [
             configPath
             sops-nix.homeManagerModules.sops
+            ({ ... }: {
+              custom.hostName = hostName;
+            })
           ];
         };
+
+      targets = {
+        "x86_64.wsl.desktop"         = { system = "x86_64-linux";  configPath = ./machines/x86_64/wsl/desktop/default.nix; };
+        "x86_64.wsl.notebook"        = { system = "x86_64-linux";  configPath = ./machines/x86_64/wsl/notebook/default.nix; };
+        "x86_64.linux.desktop"       = { system = "x86_64-linux";  configPath = ./machines/x86_64/linux/desktop/default.nix; };
+        "aarch64.android.smartphone" = { system = "aarch64-linux"; configPath = ./machines/aarch64/android/smartphone/default.nix; };
+        "aarch64.android.tablet"     = { system = "aarch64-linux"; configPath = ./machines/aarch64/android/tablet/default.nix; };
+      };
     in
     {
-      homeConfigurations = {
-        "brantes@x86_64.wsl.desktop" = mkHome { 
-          system = "x86_64-linux"; 
-          configPath = ./machines/x86_64/wsl/desktop/default.nix; 
+      homeConfigurations = nixpkgs.lib.mapAttrs' (hostName: targetCfg: {
+        name = "brantes@${hostName}";
+        value = mkHome {
+          inherit (targetCfg) system configPath;
+          inherit hostName;
         };
-
-        # Generic Linux target (useful for CI/CD on ubuntu-latest)
-        "brantes@x86_64.linux.desktop" = mkHome { 
-          system = "x86_64-linux"; 
-          configPath = ./machines/x86_64/linux/desktop/default.nix; 
-        };
-
-        "brantes@aarch64.android.smartphone" = mkHome { 
-          system = "aarch64-linux"; 
-          configPath = ./machines/aarch64/android/smartphone/default.nix; 
-        };
-
-	"brantes@aarch64.android.tablet" = mkHome {
-          system = "aarch64-linux";
-          configPath = ./machines/aarch64/android/tablet/default.nix;
-        };
-
-        "brantes@x86_64.wsl.notebook" = mkHome {
-          system = "x86_64-linux";
-          configPath = ./machines/x86_64/wsl/notebook/default.nix;
-        };
-      };
+      }) targets;
     };
 }

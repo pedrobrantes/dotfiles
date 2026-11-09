@@ -78,7 +78,28 @@
         if command -v __bp_install > /dev/null 2>&1; then
           __bp_install
         fi
+
+        pure_prompt() {
+          local ps_host="''${bold_blue?}${config.custom.hostName}''${normal?}"
+          local ps_user="''${green?}\u''${normal?}"
+          local ps_user_mark="''${green?} \$ ''${normal?}"
+          local ps_root="''${red?}\u''${red?}"
+          local ps_root_mark="''${red?} \$ ''${normal?}"
+          local ps_path="''${yellow?}\w''${normal?}"
+          local virtualenv_prompt scm_prompt
+          virtualenv_prompt="$(virtualenv_prompt)"
+          scm_prompt="$(scm_prompt)"
+          case "''${EUID:-$UID}" in
+            0)
+              ps_user_mark="''${ps_root_mark}"
+              ps_user="''${ps_root}"
+              ;;
+          esac
+          PS1="''${virtualenv_prompt}''${ps_user}@''${ps_host}''${scm_prompt}:''${ps_path}''${ps_user_mark}"
+        }
       fi
+
+      export PS1="\[\033[01;32m\]\u\[\033[00m\]@\[\033[01;34m\]${config.custom.hostName}\[\033[00m\]:\[\033[01;33m\]\w\[\033[00m\]\$ "
 
       if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
         . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"

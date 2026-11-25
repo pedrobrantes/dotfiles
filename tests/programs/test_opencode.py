@@ -10,7 +10,7 @@ def test_opencode_installed(home_manager_build):
 
 
 def test_opencode_config(home_manager_build):
-    """Verifies that opencode config.json, global AGENTS.md, and handoff commands are generated."""
+    """Verifies that opencode config.json, shared AGENTS.md symlink, and handoff commands are generated."""
     config_file = home_manager_build / "home-files/.config/opencode/config.json"
     assert config_file.exists()
 
@@ -18,11 +18,12 @@ def test_opencode_config(home_manager_build):
     assert data.get("$schema") == "https://opencode.ai/config.json"
     assert data.get("autoupdate") is False
     assert "google" in data.get("provider", {})
-    assert "context7" in data.get("mcp", {})
+    assert data["mcp"]["context7"]["enabled"] is True
+    assert data["mcp"]["obsidian"]["enabled"] is True
     assert data["mcp"]["github"]["enabled"] is False
 
     rules_file = home_manager_build / "home-files/.config/opencode/AGENTS.md"
-    assert rules_file.exists()
+    assert rules_file.is_symlink()
 
     handoff_cmd = home_manager_build / "home-files/.config/opencode/command/handoff.md"
     resume_cmd = home_manager_build / "home-files/.config/opencode/command/resume.md"

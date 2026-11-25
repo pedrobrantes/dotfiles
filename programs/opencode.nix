@@ -1,48 +1,40 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgsUnstable, ... }:
 
 let
   ollamaEnabled = config.programs.custom-ollama.enable or false;
 
-  # Subset enxuto de MCPs para o opencode (evita estourar contexto em modelos de fallback).
-  # O GitHub MCP fica pré-configurado porém desabilitado por padrão (muitos tokens; use `gh` CLI).
-  opencodeMcp = {
-    context7 = {
-      type = "remote";
-      url = "https://context7-mcp--upstash.run.tools";
-      enabled = true;
-    };
-    fetch = {
-      type = "remote";
-      url = "https://server.smithery.ai/smithery-ai/fetch/mcp";
-      enabled = true;
-    };
-    exa = {
-      type = "remote";
-      url = "https://exa.run.tools";
-      enabled = true;
-    };
-    grep = {
-      type = "remote";
-      url = "https://grep--vercel.run.tools";
-      enabled = true;
-    };
-    obsidian = {
-      type = "local";
-      command = [
-        "npx"
-        "-y"
-        "obsidian-mcp"
-        "--path"
-        "${config.home.homeDirectory}/Sync/Obsidian/My Notes"
-      ];
-      enabled = true;
-    };
-    github = {
-      type = "remote";
-      url = "https://github.run.tools";
-      enabled = false;
-    };
-  };
+  # Apenas os MCPs essenciais ficam ativos por padrão no opencode para economizar contexto.
+  # Todos os outros continuam disponíveis via programs.mcp.servers, mas com enabled = false.
+  coreMcpNames = [
+    "context7"
+    "fetch"
+    "exa"
+    "grep"
+    "obsidian"
+  ];
+
+  toOpencodeServer = name: server:
+    {
+      enabled = builtins.elem name coreMcpNames;
+    }
+    // (
+      if server ? url then
+        {
+          type = "remote";
+          url = server.url;
+        }
+        // (lib.optionalAttrs (server ? headers) { headers = server.headers; })
+      else if server ? command then
+        {
+          type = "local";
+          command = [ server.command ] ++ (server.args or [ ]);
+        }
+        // (lib.optionalAttrs (server ? env) { environment = server.env; })
+      else
+        { }
+    );
+
+  opencodeMcp = lib.mapAttrs toOpencodeServer config.programs.mcp.servers;
 
   ollamaProvider = lib.optionalAttrs ollamaEnabled {
     ollama = {
@@ -65,7 +57,7 @@ in
 {
   programs.opencode = {
     enable = true;
-    package = pkgs.opencode;
+    package = pkgsUnstable.opencode;
 
     settings = {
       autoupdate = false; # Gerenciado declarativamente via Nix/Home Manager
@@ -78,16 +70,6 @@ in
         };
       } // ollamaProvider;
     };
-
-    rules = ''
-      # Global Instructions (OpenCode)
-
-      - Respond in the same language as the user (usually PT-BR), keeping code, commits, and technical identifiers in English unless requested otherwise.
-      - Be concise and direct. Verify changes with tests/commands before concluding.
-      - If a project has `HANDOFF.md` or `PROGRESS.md`, read it when resuming work to recover context from previous sessions (e.g., Antigravity CLI / `agy`).
-      - Prefer the `gh` CLI over enabling heavy GitHub MCP tools unless explicitly needed.
-      - In `~/.config/home-manager`, remember Nix flakes only see git-tracked files (`git add` new files before running `./switch.sh`) and every module in `programs/` requires a matching `tests/programs/test_<name>.py`.
-    '';
 
     commands = {
       handoff = ''
@@ -118,6 +100,10 @@ in
       '';
     };
   };
+
+  # Global AGENTS.md compartilhado a partir de ~/.agents/AGENTS.md (fonte única com o agy)
+  xdg.configFile."opencode/AGENTS.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.agents/AGENTS.md";
 
   programs.bash.shellAliases = {
     oc = "opencode";

@@ -1,9 +1,25 @@
-{ pkgsUnstable, config, ... }:
+{ pkgsUnstable, config, lib, ... }:
 
+let
+  # Converte programs.mcp.servers (formato padrão: url / command+args)
+  # para o formato esperado pelo Antigravity (serverUrl / command+args).
+  toAntigravityServer = _name: server:
+    if server ? url then
+      { serverUrl = server.url; }
+      // (lib.optionalAttrs (server ? headers) { headers = server.headers; })
+    else
+      lib.removeAttrs server [ "disabled" ];
+
+  antigravityMcpServers = lib.mapAttrs toAntigravityServer config.programs.mcp.servers;
+in
 {
   home.packages = [
     pkgsUnstable.antigravity-cli
   ];
+
+  # Global AGENTS.md compartilhado a partir de ~/.agents/AGENTS.md
+  home.file.".gemini/AGENTS.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.agents/AGENTS.md";
 
   # Antigravity-cli configurations in ~/.gemini/antigravity-cli/
   home.file.".gemini/antigravity-cli/settings.json" = {
@@ -28,119 +44,8 @@
   home.file.".gemini/antigravity-cli/mcp_config.json" = {
     force = true;
     text = builtins.toJSON {
-    mcpServers = {
-      fetch = {
-        serverUrl = "https://server.smithery.ai/smithery-ai/fetch/mcp";
-      };
-      github = {
-        serverUrl = "https://github.run.tools";
-      };
-      context7 = {
-        serverUrl = "https://context7-mcp--upstash.run.tools";
-      };
-      grokipedia = {
-        serverUrl = "https://grokipedia-mcp--skymoore.run.tools";
-      };
-      reddit = {
-        serverUrl = "https://reddit.run.tools";
-      };
-      instagram = {
-        serverUrl = "https://instagram.run.tools";
-      };
-      linkedin = {
-        serverUrl = "https://linkedin.run.tools";
-      };
-      facebook = {
-        serverUrl = "https://facebook.run.tools";
-      };
-      discord = {
-        serverUrl = "https://discord.run.tools";
-      };
-      discourse = {
-        serverUrl = "https://discourse-forum-mcp--king-of-the-grackles.run.tools";
-      };
-      eventbrite = {
-        serverUrl = "https://eventbrite.run.tools";
-      };
-      gmail = {
-        serverUrl = "https://gmail.run.tools";
-      };
-      google-calendar = {
-        serverUrl = "https://googlecalendar.run.tools";
-      };
-      google-maps = {
-        serverUrl = "https://google_maps.run.tools";
-      };
-      notion = {
-        serverUrl = "https://notion.run.tools";
-      };
-      math = {
-        serverUrl = "https://math-mcp--ethanhenrickson.run.tools";
-      };
-      audioscrape = {
-        serverUrl = "https://audioscrape.run.tools";
-      };
-      rss-reader = {
-        serverUrl = "https://rss-reader-mcp--kwp-lab.run.tools";
-      };
-      twitter = {
-        serverUrl = "https://twitter.run.tools";
-      };
-      excel = {
-        serverUrl = "https://excel.run.tools";
-      };
-      hackernews = {
-        serverUrl = "https://hackernews.run.tools";
-      };
-      excalidraw = {
-        serverUrl = "https://excalidraw.run.tools";
-      };
-      exa = {
-        serverUrl = "https://exa.run.tools";
-      };
-      opengraph = {
-        serverUrl = "https://opengraph--opengraph.run.tools";
-      };
-      youtube = {
-        serverUrl = "https://youtube.run.tools";
-      };
-      gemini = {
-        serverUrl = "https://gemini.run.tools";
-      };
-      anki = {
-        command = "npx";
-        args = [ "-y" "@michaelfromin/anki-mcp" ];
-      };
-      obsidian = {
-        command = "npx";
-        args = [ "-y" "obsidian-mcp" "--path" "${config.home.homeDirectory}/Sync/Obsidian/My Notes" ];
-      };
-      paper-search = {
-        serverUrl = "https://paper-search-mcp-openai--adamamer20.run.tools";
-      };
-      mem0 = {
-        serverUrl = "https://mem0-memory-mcp--mem0ai.run.tools";
-      };
-      linkup = {
-        serverUrl = "https://linkup-mcp-server--linkupplatform.run.tools";
-      };
-      grep = {
-        serverUrl = "https://grep--vercel.run.tools";
-      };
-      huggingface = {
-        serverUrl = "https://huggingface.run.tools";
-      };
-      supabase = {
-        serverUrl = "https://supabase.run.tools";
-      };
-      figma = {
-        serverUrl = "http://127.0.0.1:3845/mcp";
-      };
-      stripe = {
-        serverUrl = "https://stripe.run.tools";
-      };
+      mcpServers = antigravityMcpServers;
     };
-  };
   };
 
   # Also alias to ~/.gemini/config/mcp_config.json for global Antigravity discovery

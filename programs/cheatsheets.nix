@@ -36,12 +36,15 @@
         cd "$CHEATS_DIR"
         $GIT init -b main
         $GIT remote add origin "$REPO_URL" || $GIT remote set-url origin "$REPO_URL"
-        $GIT fetch origin
-        $GIT checkout -B main
-        $GIT branch --set-upstream-to=origin/main main
+        if $GIT fetch origin -q 2>/dev/null; then
+          $GIT checkout -B main
+          $GIT branch --set-upstream-to=origin/main main || true
+        else
+          echo "Note: Skipping cheatsheets remote fetch (offline or DNS unavailable)."
+        fi
       else
         echo "Cloning cheatsheets repository..."
-        $GIT clone "$REPO_URL" "$CHEATS_DIR"
+        $GIT clone "$REPO_URL" "$CHEATS_DIR" || echo "Warning: Failed to clone cheatsheets (offline or DNS unavailable)."
       fi
     else
       # If .git exists, ensure branch is main and upstream is set
@@ -52,10 +55,13 @@
         $GIT branch -m master main
       fi
       $GIT remote set-url origin "$REPO_URL"
-      $GIT fetch origin -q
-      $GIT branch --set-upstream-to=origin/main main || true
-      echo "Restoring missing files from GitHub..."
-      $GIT reset --hard origin/main
+      if $GIT fetch origin -q 2>/dev/null; then
+        $GIT branch --set-upstream-to=origin/main main || true
+        echo "Restoring missing files from GitHub..."
+        $GIT reset --hard origin/main
+      else
+        echo "Note: Skipping cheatsheets remote fetch (offline or DNS unavailable)."
+      fi
     fi
   '';
 }

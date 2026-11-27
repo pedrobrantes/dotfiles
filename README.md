@@ -6,6 +6,8 @@ The configuration is built with a **modular monolithic** approach. While the ent
 
 For details on how to add new configurations and run tests, please see the [**Development Guide (DEVELOPMENT.md)**](./DEVELOPMENT.md).
 
+AI coding agent lifecycle hooks (agy) are documented in [docs/AI_AGENT_HOOKS.md](./docs/AI_AGENT_HOOKS.md).
+
 ## Setup on a New Machine
 
 The recommended way to set up a new machine is to use the `bootstrap.sh` script. It automates the entire process: installing Nix, cloning the repository, retrieving secrets from Bitwarden, running integration tests, and applying the correct configuration for the detected device.

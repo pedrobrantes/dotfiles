@@ -20,13 +20,14 @@ def test_antigravity_configs_generated(home_manager_build):
     servers = mcp_data["mcpServers"]
     assert "github" in servers
     assert "discourse" in servers
-    assert "google-calendar" in servers
+    assert "google-workspace" in servers
+    assert "classroom" in servers
+    assert "google-developer-knowledge" in servers
     assert "notion" in servers
     assert "math" in servers
     assert "audioscrape" in servers
     assert "rss-reader" in servers
     assert "linkedin" in servers
-    assert "google-maps" in servers
     assert "eventbrite" in servers
     assert "opengraph" in servers
     assert "grep" in servers
@@ -38,3 +39,27 @@ def test_antigravity_configs_generated(home_manager_build):
     
     # Check trustedWorkspaces
     assert "/home/brantes" in settings_data["trustedWorkspaces"]
+
+
+def test_antigravity_hooks_generated(home_manager_build):
+    """Verifies global ~/.gemini/config/hooks.json is generated with expected lifecycle hooks."""
+    import json
+
+    hooks_file = home_manager_build / "home-files/.gemini/config/hooks.json"
+    assert hooks_file.exists()
+
+    hooks_data = json.loads(hooks_file.read_text())
+    expected_hooks = {
+        "session-context": "SessionStart",
+        "safety-guard": "PreToolUse",
+        "token-guard": "PreToolUse",
+        "engineering-guard": "PreToolUse",
+        "auto-format": "PostToolUse",
+        "audit-telemetry": "PostToolUse",
+        "quality-hygiene-gate": "Stop",
+        "handoff-and-notify": "Stop",
+    }
+    for name, event_key in expected_hooks.items():
+        assert name in hooks_data, f"Missing hook: {name}"
+        assert event_key in hooks_data[name], f"Hook {name} missing event {event_key}"
+        assert ".agents/hooks/dispatch.py --agent agy --hook " in json.dumps(hooks_data[name])
